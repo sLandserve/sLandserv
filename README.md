@@ -1,7 +1,7 @@
 sLandserv
 ===
 
-`sLandserv` is an R package containing the sLandserv sDiv workshop. 
+`sLandserv` is an R package containing the [sLandserv](https://www.idiv.de/sdiv/working_groups/wg_pool/slandserv.html) sDiv workshop. 
 
 Installation
 ------------
