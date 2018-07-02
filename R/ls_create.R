@@ -39,12 +39,16 @@ ls_create <- function(nrow,
                       inter,
                       rep = 1) {
 
+  max_dim <- max(nrow, ncol)
+  N <- as.integer(ceiling(base::log(max_dim - 1, 2)))
+  size <- 2 ** N + 1
+  nrow = size
+  ncol = size
+
   params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter, rep = rep)
   # at the moment we scale the f_supply/f_demand =(0, 1] to be [1.5, 0.0001] and f_supply/f_demand == 0 to be 2.
   # a) it means we get a fuller range of fract_dim from fbm while avoiding the fact this function is unstable between 1.5 & 2
   # b) it makes more sense because increasing fragmentation matches with increasing f_supply/f_demand
-  f_supply <- ifelse(f_supply == 0, 2, 1.5 - 1.4999*f_supply)
-  f_demand <- ifelse(f_demand == 0, 2, 1.5 - 1.4999*f_demand)
 
   # create a gradient surface
   g <- NLMR::nlm_planargradient(ncol,
@@ -52,12 +56,12 @@ ls_create <- function(nrow,
 
   # create supply and demand surfaces
   # here we control the fragmentation and the amount
-  supply <- NLMR::nlm_fbm(ncol,
+  supply <- NLMR::nlm_mpd(ncol,
                     nrow,
-                    fract_dim = f_supply)
-  demand <- NLMR::nlm_fbm(ncol,
+                    roughness = f_supply)
+  demand <- NLMR::nlm_mpd(ncol,
                     nrow,
-                    fract_dim = f_demand)
+                    roughness = f_demand)
 
   # create the analysis landscape: this takes 3 steps:
   # 1. merge supply and demand
