@@ -4,8 +4,7 @@
 \alias{ls_create}
 \title{Create landscapes of ecosystem service supply (ecological) and demand (social) patches}
 \usage{
-ls_create(nrow, ncol, p_supply, p_demand, f_supply, f_demand, inter,
-  rep = NULL)
+ls_create(nrow, ncol, p_supply, p_demand, f_supply, f_demand, inter, rep = 1)
 }
 \arguments{
 \item{nrow}{Number of rows in the raster}

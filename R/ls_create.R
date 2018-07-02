@@ -45,7 +45,7 @@ ls_create <- function(nrow,
   nrow = size
   ncol = size
 
-  params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter, rep = rep)
+  params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter, reps = rep)
   # at the moment we scale the f_supply/f_demand =(0, 1] to be [1.5, 0.0001] and f_supply/f_demand == 0 to be 2.
   # a) it means we get a fuller range of fract_dim from fbm while avoiding the fact this function is unstable between 1.5 & 2
   # b) it makes more sense because increasing fragmentation matches with increasing f_supply/f_demand

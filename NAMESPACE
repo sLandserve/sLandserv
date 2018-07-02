@@ -2,4 +2,5 @@
 
 export(calculate_benefit)
 export(ls_create)
+export(network_analyse)
 export(network_create)
