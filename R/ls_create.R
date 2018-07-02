@@ -37,7 +37,7 @@ ls_create <- function(nrow,
                       f_supply,
                       f_demand,
                       inter,
-                      rep = NULL) {
+                      rep = 1) {
 
   params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter, rep = rep)
   # at the moment we scale the f_supply/f_demand =(0, 1] to be [1.5, 0.0001] and f_supply/f_demand == 0 to be 2.
