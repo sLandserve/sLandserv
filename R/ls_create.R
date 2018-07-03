@@ -58,10 +58,12 @@ ls_create <- function(nrow,
   # here we control the fragmentation and the amount
   supply <- NLMR::nlm_mpd(ncol,
                     nrow,
-                    roughness = f_supply)
+                    roughness = f_supply,
+                    verbose = FALSE)
   demand <- NLMR::nlm_mpd(ncol,
                     nrow,
-                    roughness = f_demand)
+                    roughness = f_demand,
+                    verbose = FALSE)
 
   # create the analysis landscape: this takes 3 steps:
   # 1. merge supply and demand
