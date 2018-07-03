@@ -5,20 +5,22 @@
 #'
 #'@param ls raster containing cells classified as supply, demand and neutral
 #'
+#'@param params vector containing the parameters used to generate the landscape (if landscape is simulated)
+#'
 #'@param es_thresh distance threshold for the ecological-social links
 #'
 #'@param ee_thresh distance threshold for the ecological-ecological links (default value of `NULL` means no ecological-ecological links)
 #'
 #'@param ss_thresh distance threshold for the social-social links (default value of `NULL` means no social-social links)
 #'
-#'@return A list containing the network (and its attributes) and the parameters used to simulate the landscape
+#'@return A list containing the network (and its attributes) and the parameters used to create the network
 #'
 #'@keywords ecosystem services, spatial, social ecological system, neutral landscape model
 #'
 #'@export
-network_create <- function(x, es_thresh, ee_thresh = NULL, ss_thresh = NULL) {
+network_create <- function(ls, params = NULL, es_thresh, ee_thresh = NULL, ss_thresh = NULL) {
   # create attribute table
-  all_nodes <- raster::rasterToPolygons(x$ls, dissolve=TRUE) %>%
+  all_nodes <- raster::rasterToPolygons(ls, dissolve=TRUE) %>%
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
     dplyr::mutate(ID = as.character(1:n()),
@@ -57,5 +59,11 @@ network_create <- function(x, es_thresh, ee_thresh = NULL, ss_thresh = NULL) {
 
   network <- list(node_code = all_nodes$patch_code, node_type = all_nodes$patch_type, node_areas = all_nodes$patch_area, net_links = net_links)
 
-  return(list(network = network, params = x$params))
+  if(is.null(params)) {
+    params <- data.frame(es_thresh = es_thresh, ee_thres = ee_thresh, ss_thresh = ss_thresh)
+  } else {
+    params <- data.frame(params, es_thresh = es_thresh, ee_thres = ee_thresh, ss_thresh = ss_thresh)
+  }
+
+  return(list(network = network, params = params))
 }

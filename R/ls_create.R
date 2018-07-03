@@ -77,5 +77,5 @@ ls_create <- function(nrow,
                       weighting = c(p_supply, 1 - (p_supply + p_demand), p_demand),
                       level_names = c("supply", "neutral", "demand"))
 
-  return(list(ls = ls, params = params))
+  return(list(ls = ls, params = data.frame(params)))
 }
