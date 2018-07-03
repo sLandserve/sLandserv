@@ -50,7 +50,7 @@ calculate_benefit <- function(net, rival, alpha, beta, gamma, eta) {
     benefit_ES <- apply(as.matrix(1:length(demand_ids)), MARGIN = 1, FUN = function(x, supply_ES, ds_links, s_areas, gamma, eta) {if(!is.null(dim(ds_links))) {((d_areas[x] * gamma) / eta) * (1 - exp(-eta * sum(d_areas[x] * apply(ds_links, MARGIN = 2, FUN = function(y, d_areas) {if (sum(y) > 0) {1 / sum(y * d_areas)} else {0}}, d_areas = d_areas) * ds_links[x,] * supply_ES)))} else {((d_areas[x] * gamma) / eta) * (1 - exp(-eta * sum(ds_links * supply_ES)))}}, supply_ES = supply_ES, ds_links = ds_links, s_areas = s_areas, gamma = gamma, eta = eta)
 }
   benefit <- sum(benefit_ES)
-  output <- data.frame(net$params, benefit = benefit)
+  output <- data.frame(net$params, rival = rival, alpha = alpha, beta = beta, gamma = gamma, eta = eta, benefit = benefit)
 
   return(output)
 }
