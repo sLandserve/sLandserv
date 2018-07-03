@@ -18,7 +18,7 @@
 #'@keywords ecosystem services, spatial, social ecological system, neutral landscape model
 #'
 #'@export
-network_create <- function(ls, params = NULL, es_thresh, ee_thresh = NULL, ss_thresh = NULL) {
+network_create <- function(ls, params = NULL, es_thresh, ee_thresh = NA, ss_thresh = NA) {
   # create attribute table
   all_nodes <- raster::rasterToPolygons(ls, dissolve=TRUE) %>%
     raster::disaggregate() %>%
@@ -45,13 +45,13 @@ network_create <- function(ls, params = NULL, es_thresh, ee_thresh = NULL, ss_th
   net_links[supply_nodes, demand_nodes] <- ifelse(net_links[supply_nodes, demand_nodes] <= es_thresh, 1, 0)
   net_links[demand_nodes, supply_nodes] <- ifelse(net_links[demand_nodes, supply_nodes] <= es_thresh, 1, 0)
 
-  if(!is.null(ee_thresh)) {
+  if(!is.na(ee_thresh)) {
     net_links[supply_nodes, supply_nodes] <- ifelse(net_links[supply_nodes, supply_nodes] <= ee_thresh, 1, 0)
   } else {
     net_links[supply_nodes, supply_nodes] <- 0
   }
 
-  if(!is.null(ss_thresh)) {
+  if(!is.na(ss_thresh)) {
     net_links[demand_nodes, demand_nodes] <- ifelse(net_links[demand_nodes, demand_nodes] <= ee_thresh, 1, 0)
   } else {
     net_links[demand_nodes, demand_nodes] <- 0
