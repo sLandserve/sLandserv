@@ -21,7 +21,6 @@
 #'@param inter Interpersion between ES supply and demand (in the range [0, 1] with 1 being
 #'  completely interspersed)
 #'
-#'@param rep This is an integer which is just to keep track of which replicate results are from
 #'
 #'@return A list containing a raster of the supply, demand, and if appropriate (p_supply +
 #'  p_demand != 1) neutral landcover types and the parameters used to generate it
@@ -36,8 +35,7 @@ ls_create <- function(nrow,
                       p_demand,
                       f_supply,
                       f_demand,
-                      inter,
-                      rep = 1) {
+                      inter) {
 
   max_dim <- max(nrow, ncol)
   N <- as.integer(ceiling(base::log(max_dim - 1, 2)))
@@ -45,7 +43,7 @@ ls_create <- function(nrow,
   nrow = size
   ncol = size
 
-  params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter, reps = rep)
+  params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter)
   # at the moment we scale the f_supply/f_demand =(0, 1] to be [1.5, 0.0001] and f_supply/f_demand == 0 to be 2.
   # a) it means we get a fuller range of fract_dim from fbm while avoiding the fact this function is unstable between 1.5 & 2
   # b) it makes more sense because increasing fragmentation matches with increasing f_supply/f_demand

@@ -16,7 +16,7 @@ network_analyse <- function(net) {
   x$params$num_demand <- length(which(network$node_type == "demand"))
   #density of ecological-ecological (supply-supply) network
   if (x$params$num_supply > 1) {
-    EE_network <-  network::network(as.matrix(network$net_links[which(network$node_type == "supply"), which(network$node_type == "supply")]), directed=FALSE, loops=TRUE)
+    EE_network <-  network::network(as.matrix(network$net_links[which(network$node_type == "supply"), which(network$node_type == "supply")]), directed=FALSE, loops=FALSE)
     x$params$ee_density <- network::network.density(EE_network)
   } else {
     x$params$ee_density <- as.matrix(network$net_links[which(network$node_type == "supply"), which(network$node_type == "supply")])[1,1]

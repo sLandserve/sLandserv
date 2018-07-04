@@ -45,6 +45,8 @@ network_create <- function(ls, params = NULL, es_thresh, ee_thresh = NA, ss_thre
   net_links[supply_nodes, demand_nodes] <- ifelse(net_links[supply_nodes, demand_nodes] <= es_thresh, 1, 0)
   net_links[demand_nodes, supply_nodes] <- ifelse(net_links[demand_nodes, supply_nodes] <= es_thresh, 1, 0)
 
+  diag(net_links) <- 0
+
   if(!is.na(ee_thresh)) {
     net_links[supply_nodes, supply_nodes] <- ifelse(net_links[supply_nodes, supply_nodes] <= ee_thresh, 1, 0)
   } else {
@@ -59,10 +61,29 @@ network_create <- function(ls, params = NULL, es_thresh, ee_thresh = NA, ss_thre
 
   network <- list(node_code = all_nodes$patch_code, node_type = all_nodes$patch_type, node_areas = all_nodes$patch_area, net_links = net_links)
 
-  if(is.null(params)) {
-    params <- data.frame(es_thresh = es_thresh, ee_thres = ee_thresh, ss_thresh = ss_thresh)
+  #number of supply nodes
+  num_supply <- length(which(network$node_type == "supply"))
+  #number of demand nodes
+  num_demand <- length(which(network$node_type == "demand"))
+  #density of ecological-ecological (supply-supply) network
+  if (num_supply > 1) {
+    EE_network <-  network::network(as.matrix(network$net_links[which(network$node_type == "supply"), which(network$node_type == "supply")]), directed=FALSE, loops=FALSE)
+    ee_density <- network::network.density(EE_network)
   } else {
-    params <- data.frame(params, es_thresh = es_thresh, ee_thres = ee_thresh, ss_thresh = ss_thresh)
+    ee_density <- as.matrix(network$net_links[which(network$node_type == "supply"), which(network$node_type == "supply")])[1,1]
+  }
+
+  #density of social-ecological (demand-supply) bipartite network
+  SE_matrix <- matrix(0,nrow=num_demand + num_supply, ncol=num_demand + num_supply)
+  SE_matrix[1:num_demand, (num_demand + 1):ncol(SE_matrix)] <- network$net_links[which(network$node_type == "demand"), which(network$node_type == "supply")]
+  SE_matrix[(num_demand + 1):nrow(SE_matrix), 1:num_demand] <- network$net_links[which(network$node_type == "supply"), which(network$node_type == "demand")]
+  SE_network <-  network::network(SE_matrix, bipartite=num_demand, directed = FALSE)
+  se_density <- network::network.density(SE_network, discount.bipartite=TRUE)
+
+  if(is.null(params)) {
+    params <- data.frame(es_thresh = es_thresh, ee_thres = ee_thresh, ss_thresh = ss_thresh, num_supply = num_supply, num_demand = num_demand, ee_density = ee_density, se_density = se_density)
+  } else {
+    params <- data.frame(params, es_thresh = es_thresh, ee_thres = ee_thresh, ss_thresh = ss_thresh, num_supply = num_supply, num_demand = num_demand, ee_density = ee_density, se_density = se_density)
   }
 
   return(list(network = network, params = params))
