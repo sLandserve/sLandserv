@@ -3,7 +3,6 @@
 export(calculate_benefit)
 export(create_ee_network)
 export(create_es_network)
-export(es_network)
 export(ls_create)
 export(network_analyse)
 export(network_create)

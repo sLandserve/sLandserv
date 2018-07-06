@@ -9,7 +9,9 @@
 #'
 #'@param es_thresh distance threshold for the social-ecological links
 #'
-#'@param area_col column which contains the area information (NB this can be area, or modified area, such as by quality)
+#'@param supply_area_col column which contains the area information for supply (NB this can be area, or modified area, such as by quality)
+#'
+#'#'@param supply_area_col column which contains the area information for demand (NB this can be area, or modified area, such as by population)
 #'
 #'@param params vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)
 #'
@@ -18,7 +20,20 @@
 #'@keywords ecosystem services, spatial, ecological system, neutral landscape model
 #'
 #'@export
-create_es_network <- function(ls_supply, ls_demand, es_thresh, area_col = NULL, params = NULL) {
+create_es_network <- function(ls_supply,
+                              ls_demand,
+                              es_thresh,
+                              supply_area_col = NULL,
+                              demand_area_col = NULL,
+                              params = NULL) {
+
+  # turn into sf object
+  if(class(ls_supply) == "sp") ls_supply <- sf::st_as_sf(ls_supply)
+  if(class(ls_demand) == "sp") ls_supply <- sf::st_as_sf(ls_demand)
+
+  # rename the area column for comparison
+  if(!is.null(supply_area_col)) ls_supply <- dplyr::mutate(ls_supply, patch_area = get(supply_area_col))
+  if(!is.null(demand_area_col)) ls_demand <- dplyr::mutate(ls_demand, patch_area = get(demand_area_col))
 
   # calculate all pairwise distances
   pts_supply <- sf::st_centroid(ls_supply)

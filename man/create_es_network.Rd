@@ -4,8 +4,8 @@
 \alias{create_es_network}
 \title{Create social-ecological networks}
 \usage{
-create_es_network(ls_supply, ls_demand, es_thresh, area_col = NULL,
-  params = NULL)
+create_es_network(ls_supply, ls_demand, es_thresh, supply_area_col = NULL,
+  demand_area_col = NULL, params = NULL)
 }
 \arguments{
 \item{ls_supply}{polygon containing ecosystem service supply areas}
@@ -14,7 +14,9 @@ create_es_network(ls_supply, ls_demand, es_thresh, area_col = NULL,
 
 \item{es_thresh}{distance threshold for the social-ecological links}
 
-\item{area_col}{column which contains the area information (NB this can be area, or modified area, such as by quality)}
+\item{supply_area_col}{column which contains the area information for supply (NB this can be area, or modified area, such as by quality)
+
+#'@param supply_area_col column which contains the area information for demand (NB this can be area, or modified area, such as by population)}
 
 \item{params}{vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)}
 }

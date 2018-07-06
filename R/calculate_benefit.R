@@ -19,57 +19,46 @@
 #'
 #'@export
 
-calculate_benefit <- function(ee_network, es_network, alpha, beta, gamma) {
+calculate_benefit <- function(ee_network, es_network, alpha, beta, gamma, params = NULL) {
   # 1. calculate per node supply ----
-  if(nrow(ee_network > 0)) {
-    supply <- ee_network$network %>%
-      dplyr::group_by(node1) %>%
-      dplyr::summarise(node1_area = mean(node1_area),
-                       connected_area = sum(node2_area)) %>%
-      dplyr::mutate(supply = (node1_area^alpha)*exp(beta*connected_area))
-  } else {
-    supply <- dplyr::group_by(es_network$network, node_supply) %>%
-      dplyr::summarise(supply = sum(supply_area)) %>%
-      dplyr::mutate(supply = supply^alpha)
-  }
+  supply <- ee_network %>%
+    dplyr::group_by(node1) %>%
+    dplyr::summarise(node1_area = mean(node1_area),
+                     connected_area = sum(node2_area)) %>%
+    dplyr::mutate(supply = (node1_area^alpha)*exp(beta*connected_area))
 
   # 2. calculate per node benefit ----
-  if(nrow(es_network) > 0) {
-    demand <- es_network$network %>%
-      dplyr::inner_join(supply, by = c("node_supply" = "node1")) %>%
-      dplyr::select(-connected_area)
+  demand <- es_network %>%
+    dplyr::inner_join(supply, by = c("node_supply" = "node1")) %>%
+    dplyr::select(-connected_area)
 
-    if(rival) {
-      # rival
-      competing <- demand %>% group_by(node_supply) %>%
-        summarise(connected_demand = sum(demand_area))
+  if(rival) {
+    # rival
+    competing <- demand %>% group_by(node_supply) %>%
+      summarise(connected_demand = sum(demand_area))
 
-      benefit <- demand %>%
-        dplyr::inner_join(competing) %>%
-        dplyr::mutate(prop_benefit = 1 / connected_demand) %>%
-        group_by(node_demand, demand_area, node_supply, supply_area) %>%
-        summarise(prop_benefit = sum(prop_benefit)) %>%
-        mutate(supply = supply_area*prop_benefit) %>%
-        group_by(node_demand, demand_area) %>%
-        summarise(supply = sum(supply)) %>%
-        mutate(benefit = (demand_area / gamma) * (1 - exp(-gamma * supply)))
+    benefit <- demand %>%
+      dplyr::inner_join(competing) %>%
+      dplyr::mutate(prop_benefit = 1 / connected_demand) %>%
+      group_by(node_demand, demand_area, node_supply, supply_area) %>%
+      summarise(prop_benefit = sum(prop_benefit)) %>%
+      mutate(supply = supply_area*prop_benefit) %>%
+      group_by(node_demand, demand_area) %>%
+      summarise(supply = sum(supply)) %>%
+      mutate(benefit = (demand_area / gamma) * (1 - exp(-gamma * supply)))
 
-    } else {
-      # non-rival
-      benefit <- demand %>%
-        group_by(node_demand, demand_area) %>%
-        summarise(supply = sum(supply_area)) %>%
-        mutate(benefit = (demand_area / gamma) * (1 - exp(-gamma * supply)))
-    }
-
-    # 3. calculate total benefit ----
-    benefit <- sum(benefit$benefit)
   } else {
-    benefit <- 0
+    # non-rival
+    benefit <- demand %>%
+      group_by(node_demand, demand_area) %>%
+      summarise(supply = sum(supply_area)) %>%
+      mutate(benefit = (demand_area / gamma) * (1 - exp(-gamma * supply)))
   }
 
+  # 3. calculate total benefit ----
+  benefit <- sum(benefit$benefit)
 
   # 4. output parameters ----
-  params <- data.frame(ee_network$params, es_network$params, benefit = benefit)
+  params <- data.frame(params, benefit = benefit)
   return(params)
 }

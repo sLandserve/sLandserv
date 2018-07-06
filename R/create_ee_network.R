@@ -18,8 +18,11 @@
 #'@export
 create_ee_network <- function(ls_supply, ee_thresh, area_col = NULL, params = NULL) {
 
+  # turn into sf object
+  if(class(ls_supply) == "sp") ls_supply <- sf::st_as_sf(ls_supply)
+
   # rename the area column for comparison
-  if(!is.null(area_col)) ls_supply <- mutate(ls_supply, patch_area = get(area_col))
+  if(!is.null(area_col)) ls_supply <- dplyr::mutate(ls_supply, patch_area = get(area_col))
 
   # calculate all pairwise distances
   pts <- sf::st_centroid(ls_supply)
