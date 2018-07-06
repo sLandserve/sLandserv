@@ -4,7 +4,7 @@
 \alias{ls_create}
 \title{Create landscapes of ecosystem service supply (ecological) and demand (social) patches}
 \usage{
-ls_create(nrow, ncol, p_supply, p_demand, f_supply, f_demand, inter, rep = 1)
+ls_create(nrow, ncol, p_supply, p_demand, f_supply, f_demand, inter)
 }
 \arguments{
 \item{nrow}{Number of rows in the raster}
@@ -23,12 +23,11 @@ the most fragmented)}
 
 \item{inter}{Interpersion between ES supply and demand (in the range [0, 1] with 1 being
 completely interspersed)}
-
-\item{rep}{This is an integer which is just to keep track of which replicate results are from}
 }
 \value{
 A list containing a raster of the supply, demand, and if appropriate (p_supply +
- p_demand != 1) neutral landcover types and the parameters used to generate it
+ p_demand != 1) neutral landcover types, a polygon containing the supply patches, a
+ polygon containing the demand patches and the parameters used to generate it
 }
 \description{
 `ls_create` simulates ecosystem service supply and demand landscapes based

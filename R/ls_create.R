@@ -23,7 +23,8 @@
 #'
 #'
 #'@return A list containing a raster of the supply, demand, and if appropriate (p_supply +
-#'  p_demand != 1) neutral landcover types and the parameters used to generate it
+#'  p_demand != 1) neutral landcover types, a polygon containing the supply patches, a
+#'  polygon containing the demand patches and the parameters used to generate it
 #'
 #'@keywords ecosystem services, spatial, social ecological system, neutral landscape model
 #'
@@ -75,5 +76,16 @@ ls_create <- function(nrow,
                       weighting = c(p_supply, 1 - (p_supply + p_demand), p_demand),
                       level_names = c("supply", "neutral", "demand"))
 
-  return(list(ls = ls, params = data.frame(params)))
+  # 4. polygonise and split out supply and demand
+  ls_poly <- raster::rasterToPolygons(ls, dissolve=TRUE) %>%
+    raster::disaggregate() %>%
+    sf::st_as_sf() %>%
+    dplyr::mutate(patch_area = sf::st_area(.))
+
+  ls_supply <- filter(ls_poly, layer == 0) %>%
+    dplyr::mutate(ID = 1:n())
+  ls_demand <- filter(ls_poly, layer == 2) %>%
+    dplyr::mutate(ID = 1:n())
+
+  return(list(ls = ls, ls_supply = ls_supply, ls_demand = ls_demand, params = data.frame(params)))
 }

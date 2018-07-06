@@ -4,19 +4,22 @@
 \alias{network_create}
 \title{Create social-ecological networks from raster landscapes}
 \usage{
-network_create(x, es_thresh, ee_thresh = NULL, ss_thresh = NULL)
+network_create(ls, params = NULL, es_thresh, ee_thresh = NA,
+  ss_thresh = NA)
 }
 \arguments{
+\item{ls}{raster containing cells classified as supply, demand and neutral}
+
+\item{params}{vector containing the parameters used to generate the landscape (if landscape is simulated)}
+
 \item{es_thresh}{distance threshold for the ecological-social links}
 
 \item{ee_thresh}{distance threshold for the ecological-ecological links (default value of `NULL` means no ecological-ecological links)}
 
 \item{ss_thresh}{distance threshold for the social-social links (default value of `NULL` means no social-social links)}
-
-\item{ls}{raster containing cells classified as supply, demand and neutral}
 }
 \value{
-A list containing the network (and its attributes) and the parameters used to simulate the landscape
+A list containing the network (and its attributes) and the parameters used to create the network
 }
 \description{
 `network_create` takes as input a raster (either real data or result of
