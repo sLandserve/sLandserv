@@ -16,7 +16,15 @@
 #'@keywords ecosystem services, spatial, ecological system, neutral landscape model
 #'
 #'@export
-create_ee_network <- function(ls_supply, ee_thresh, supply_area, params = NULL) {
+create_ee_network <- function(ls_supply,
+                              ee_thresh,
+                              supply_area,
+                              params = NULL) {
+
+  # if no parameters are input, start the table here
+  if(is.null(params)) {
+    params <- data.frame(ee_thresh = ee_thresh)
+  }
 
   # turn into sf object
   if(is(ls_supply, "Spatial")) ls_supply <- sf::st_as_sf(ls_supply)
@@ -33,16 +41,11 @@ create_ee_network <- function(ls_supply, ee_thresh, supply_area, params = NULL) 
   net_links <- ifelse(net_links <= ee_thresh, 1, 0)
 
   #number of supply nodes
-  num_nodes <- nrow(ls_supply)
+  params$num_nodes <- nrow(ls_supply)
 
+  # calculate network density
   ee_network <-  network::network(as.matrix(net_links, directed=FALSE, loops=TRUE))
-  ee_density <- network::network.density(ee_network)
-
-  if(is.null(params)) {
-    params <- data.frame(ee_thresh = ee_thresh, num_supply = num_nodes, ee_density = ee_density)
-  } else {
-    params <- data.frame(params, ee_thresh = ee_thresh, num_supply = num_nodes, ee_density = ee_density)
-  }
+  params$ee_density <- network::network.density(ee_network)
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%

@@ -27,6 +27,11 @@ create_es_network <- function(ls_supply,
                               demand_area,
                               params = NULL) {
 
+  # if no parameters are input, start the table here
+  if(is.null(params)) {
+    params <- data.frame(es_thresh = es_thresh)
+  }
+
   # turn into sf object
   if(is(ls_supply, "Spatial")) ls_supply <- sf::st_as_sf(ls_supply)
   if(is(ls_demand, "Spatial")) ls_demand <- sf::st_as_sf(ls_demand)
@@ -47,17 +52,16 @@ create_es_network <- function(ls_supply,
   net_links <- ifelse(net_links <= es_thresh, 1, 0)
 
   #number of supply nodes
-  num_demand <- nrow(ls_demand)
+  params$num_demand <- nrow(ls_demand)
 
-  # network density
-  es_network <-  network::network(as.matrix(net_links, directed=FALSE, loops=FALSE))
-  es_density <- network::network.density(es_network)
-
-  if(is.null(params)) {
-    params <- data.frame(es_thresh = es_thresh, num_demand = num_demand, es_density = es_density)
-  } else {
-    params <- data.frame(params, es_thresh = es_thresh, num_demand = num_demand, es_density = es_density)
+  # escape from function and return NA if no social-ecological links
+  if(sum(net_links) == 0) {
+    params$es_network <- NA
+    return(list(network = NA, params = params))
   }
+
+  es_network <-  network::network(as.matrix(net_links, directed=FALSE, loops=FALSE))
+  params$es_density <- network::network.density(es_network)
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%
