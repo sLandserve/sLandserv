@@ -4,16 +4,16 @@
 \alias{create_ee_network}
 \title{Create ecological-ecological networks}
 \usage{
-create_ee_network(ls_supply, ee_thresh, area_col = NULL, params = NULL)
+create_ee_network(ls_supply, ee_thresh, supply_area, params = NULL)
 }
 \arguments{
 \item{ls_supply}{polygon containing ecosystem service supply areas}
 
 \item{ee_thresh}{distance threshold for the ecological-ecological links}
 
-\item{area_col}{column which contains the area information (NB this can be area, or modified area, such as by quality)}
+\item{supply_area}{name of the column containing the supply area measure}
 
-\item{params}{vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)}
+\item{params}{vector containing the parameters used to generate the landscape if landscape is simulated (default = NULL)}
 }
 \value{
 A list containing the network (and its attributes) and the parameters used to create the network

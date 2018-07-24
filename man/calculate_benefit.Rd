@@ -4,18 +4,21 @@
 \alias{calculate_benefit}
 \title{Calculate ecosystem service benefit from a network}
 \usage{
-calculate_benefit(ee_network, es_network, alpha, beta, gamma, params = NULL)
+calculate_benefit(ee_network, es_network, rival, alpha, beta, gamma,
+  params = NULL)
 }
 \arguments{
+\item{ee_network}{ecological-ecological network from which to calculate supply (created using `create_ee_network`)}
+
+\item{es_network}{social-ecological network from which to calculate benefit (created using `create_es_network`)}
+
+\item{rival}{whether the services are rival (TRUE) or non-rival (FALSE)}
+
 \item{alpha}{the rate of production of the potential ecosystem service per unit area at supply nodes (value > 0)}
 
 \item{beta}{the influence of connected supply nodes (i.e., the ecological-ecological links) on the rate of production of the potential ecosystem service at supply nodes (value > 0)}
 
 \item{gamma}{marginal utility of the service at zero service used}
-
-\item{net}{social-ecological network from which to calculate benefit (created using `network_create`)}
-
-\item{rival}{whether the services are rival (TRUE) or non-rival (FALSE)}
 }
 \value{
 A vector containing the ecosystem service benefit and the parameters used to generate the network

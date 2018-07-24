@@ -45,9 +45,6 @@ ls_create <- function(nrow,
   ncol = size
 
   params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter)
-  # at the moment we scale the f_supply/f_demand =(0, 1] to be [1.5, 0.0001] and f_supply/f_demand == 0 to be 2.
-  # a) it means we get a fuller range of fract_dim from fbm while avoiding the fact this function is unstable between 1.5 & 2
-  # b) it makes more sense because increasing fragmentation matches with increasing f_supply/f_demand
 
   # create a gradient surface
   g <- NLMR::nlm_planargradient(ncol,
@@ -82,10 +79,8 @@ ls_create <- function(nrow,
     sf::st_as_sf() %>%
     dplyr::mutate(patch_area = sf::st_area(.))
 
-  ls_supply <- filter(ls_poly, layer == 0) %>%
-    dplyr::mutate(ID = 1:n())
-  ls_demand <- filter(ls_poly, layer == 2) %>%
-    dplyr::mutate(ID = 1:n())
+  ls_supply <- filter(ls_poly, layer == 0) %>% select(-layer)
+  ls_demand <- filter(ls_poly, layer == 2) %>% select(-layer)
 
   return(list(ls = ls, ls_supply = ls_supply, ls_demand = ls_demand, params = data.frame(params)))
 }

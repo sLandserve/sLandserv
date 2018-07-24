@@ -7,24 +7,26 @@
 #'
 #'@param ee_thresh distance threshold for the ecological-ecological links
 #'
-#'@param area_col column which contains the area information (NB this can be area, or modified area, such as by quality)
+#'@param supply_area name of the column containing the supply area measure
 #'
-#'@param params vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)
+#'@param params vector containing the parameters used to generate the landscape if landscape is simulated (default = NULL)
 #'
 #'@return A list containing the network (and its attributes) and the parameters used to create the network
 #'
 #'@keywords ecosystem services, spatial, ecological system, neutral landscape model
 #'
 #'@export
-create_ee_network <- function(ls_supply, ee_thresh, area_col = NULL, params = NULL) {
+create_ee_network <- function(ls_supply, ee_thresh, supply_area, params = NULL) {
 
   # turn into sf object
-  if(class(ls_supply) == "sp") ls_supply <- sf::st_as_sf(ls_supply)
+  if(is(ls_supply, "Spatial")) ls_supply <- sf::st_as_sf(ls_supply)
 
-  # rename the area column for comparison
-  if(!is.null(area_col)) ls_supply <- dplyr::mutate(ls_supply, patch_area = get(area_col))
+  # add on an ID column and rename the area column
+  ls_supply <- dplyr::mutate(ls_supply, ID = 1:n()) %>%
+    rename(area = !!supply_area)
 
   # calculate all pairwise distances
+  sf::st_agr(ls_supply) = "constant" # this removes the warning message
   pts <- sf::st_centroid(ls_supply)
   net_links <- sf::st_distance(pts)
 
@@ -49,9 +51,11 @@ create_ee_network <- function(ls_supply, ee_thresh, area_col = NULL, params = NU
     dplyr::mutate(node2 = stringr::str_replace(node2, "V", ""),
                   node1 = as.integer(node1),
                   node2 = as.integer(node2)) %>%
-    dplyr::inner_join(ls_supply, by = c("node1" = "ID")) %>%
-    dplyr::inner_join(ls_supply, by = c("node2" = "ID")) %>%
-    dplyr::select(node1, node2, link, node1_area = patch_area.x, node2_area = patch_area.y)
+    dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node1" = "ID")) %>%
+    dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node2" = "ID"),
+                      suffix = c("_node1", "_node2")) %>%
+    dplyr::filter(link == 1) %>%
+    dplyr::select(-link)
 
   return(list(network = network, params = params))
 }

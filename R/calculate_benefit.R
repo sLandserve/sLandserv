@@ -3,7 +3,9 @@
 #'@description `calculate_benefit` calculates the ecosystem services benefits from a given
 #'  network and a given set of rules.
 #'
-#'@param net social-ecological network from which to calculate benefit (created using `network_create`)
+#'@param ee_network ecological-ecological network from which to calculate supply (created using `create_ee_network`)
+#'
+#'@param es_network social-ecological network from which to calculate benefit (created using `create_es_network`)
 #'
 #'@param rival whether the services are rival (TRUE) or non-rival (FALSE)
 #'
@@ -19,40 +21,41 @@
 #'
 #'@export
 
-calculate_benefit <- function(ee_network, es_network, alpha, beta, gamma, params = NULL) {
+calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma, params = NULL) {
+
   # 1. calculate per node supply ----
   supply <- ee_network %>%
     dplyr::group_by(node1) %>%
-    dplyr::summarise(node1_area = mean(node1_area),
-                     connected_area = sum(node2_area)) %>%
-    dplyr::mutate(supply = (node1_area^alpha)*exp(beta*connected_area))
+    dplyr::summarise(area_node1 = mean(area_node1),
+                     connected_supply = sum(area_node2)) %>%
+    dplyr::mutate(supply = (area_node1^alpha)*exp(beta*connected_supply))
 
   # 2. calculate per node benefit ----
   demand <- es_network %>%
     dplyr::inner_join(supply, by = c("node_supply" = "node1")) %>%
-    dplyr::select(-connected_area)
+    dplyr::select(-connected_supply)
 
   if(rival) {
     # rival
     competing <- demand %>% group_by(node_supply) %>%
-      summarise(connected_demand = sum(demand_area))
+      summarise(connected_demand = sum(area_demand))
 
     benefit <- demand %>%
-      dplyr::inner_join(competing) %>%
+      dplyr::inner_join(competing, by = "node_supply") %>%
       dplyr::mutate(prop_benefit = 1 / connected_demand) %>%
-      group_by(node_demand, demand_area, node_supply, supply_area) %>%
-      summarise(prop_benefit = sum(prop_benefit)) %>%
-      mutate(supply = supply_area*prop_benefit) %>%
-      group_by(node_demand, demand_area) %>%
-      summarise(supply = sum(supply)) %>%
-      mutate(benefit = (demand_area / gamma) * (1 - exp(-gamma * supply)))
+      dplyr::group_by(node_demand, area_demand, node_supply, supply) %>%
+      dplyr::summarise(prop_benefit = sum(prop_benefit)) %>%
+      dplyr::mutate(supply = supply*prop_benefit) %>%
+      dplyr::group_by(node_demand, area_demand) %>%
+      dplyr::summarise(supply = sum(supply)) %>%
+      dplyr::mutate(benefit = (area_demand / gamma) * (1 - exp(-gamma * supply)))
 
   } else {
     # non-rival
     benefit <- demand %>%
-      group_by(node_demand, demand_area) %>%
-      summarise(supply = sum(supply_area)) %>%
-      mutate(benefit = (demand_area / gamma) * (1 - exp(-gamma * supply)))
+      dplyr::group_by(node_demand, demand_area) %>%
+      dplyr::summarise(supply = sum(supply)) %>%
+      dplyr::mutate(benefit = (demand_area / gamma) * (1 - exp(-gamma * supply)))
   }
 
   # 3. calculate total benefit ----
