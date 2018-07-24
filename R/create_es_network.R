@@ -30,6 +30,8 @@ create_es_network <- function(ls_supply,
   # if no parameters are input, start the table here
   if(is.null(params)) {
     params <- data.frame(es_thresh = es_thresh)
+  } else {
+    params$es_thresh <- es_thresh
   }
 
   # turn into sf object

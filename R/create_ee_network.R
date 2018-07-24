@@ -24,6 +24,8 @@ create_ee_network <- function(ls_supply,
   # if no parameters are input, start the table here
   if(is.null(params)) {
     params <- data.frame(ee_thresh = ee_thresh)
+  } else {
+    params$ee_thresh <- ee_thresh
   }
 
   # turn into sf object
@@ -41,7 +43,7 @@ create_ee_network <- function(ls_supply,
   net_links <- ifelse(net_links <= ee_thresh, 1, 0)
 
   #number of supply nodes
-  params$num_nodes <- nrow(ls_supply)
+  params$num_supply <- nrow(ls_supply)
 
   # calculate network density
   ee_network <-  network::network(as.matrix(net_links, directed=FALSE, loops=TRUE))
