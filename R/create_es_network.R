@@ -58,7 +58,7 @@ create_es_network <- function(ls_supply,
 
   # escape from function and return NA if no social-ecological links
   if(sum(net_links) == 0) {
-    params$es_network <- NA
+    params$es_density <- NA
     return(list(network = NA, params = params))
   }
 
