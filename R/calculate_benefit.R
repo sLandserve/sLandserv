@@ -28,6 +28,8 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
     params <- data.frame(rival = rival, alpha = alpha, beta = beta, gamma = gamma)
   }
 
+  params <- data.frame(params, rival = rival, alpha = alpha, beta = beta, gamma = gamma)
+
   # if there is no social-ecological network, escape function and return 0
   if(!is(es_network, "data.frame")) {
     params$benefit <- 0
