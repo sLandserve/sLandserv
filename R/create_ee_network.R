@@ -40,6 +40,7 @@ create_ee_network <- function(ls_supply,
   pts <- sf::st_centroid(ls_supply)
   net_links <- sf::st_distance(pts)
 
+  ee_thresh <- ifelse(is.na(ee_thresh), -1, ee_thresh)
   net_links <- ifelse(net_links <= ee_thresh, 1, 0)
 
   #number of supply nodes
@@ -58,9 +59,7 @@ create_ee_network <- function(ls_supply,
                   node2 = as.integer(node2)) %>%
     dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node1" = "ID")) %>%
     dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node2" = "ID"),
-                      suffix = c("_node1", "_node2")) %>%
-    dplyr::filter(link == 1) %>%
-    dplyr::select(-link)
+                      suffix = c("_node1", "_node2"))
 
   return(list(network = network, params = params))
 }
