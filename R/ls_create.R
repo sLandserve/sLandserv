@@ -79,8 +79,8 @@ ls_create <- function(nrow,
     sf::st_as_sf() %>%
     dplyr::mutate(patch_area = sf::st_area(.))
 
-  ls_supply <- filter(ls_poly, layer == 0) %>% select(-layer)
-  ls_demand <- filter(ls_poly, layer == 2) %>% select(-layer)
+  ls_supply <- dplyr::filter(ls_poly, layer == 0) %>% dplyr::select(-layer)
+  ls_demand <- dplyr::filter(ls_poly, layer == 2) %>% dplyr::select(-layer)
 
   return(list(ls = ls, ls_supply = ls_supply, ls_demand = ls_demand, params = data.frame(params)))
 }

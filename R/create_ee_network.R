@@ -33,7 +33,7 @@ create_ee_network <- function(ls_supply,
 
   # add on an ID column and rename the area column
   ls_supply <- dplyr::mutate(ls_supply, ID = 1:n()) %>%
-    rename(area = !!supply_area)
+    dplyr::rename(area = !!supply_area)
 
   # calculate all pairwise distances
   sf::st_agr(ls_supply) = "constant" # this removes the warning message
