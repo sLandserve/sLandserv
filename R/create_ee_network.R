@@ -47,8 +47,12 @@ create_ee_network <- function(ls_supply,
   params$num_supply <- nrow(ls_supply)
 
   # calculate network density
-  ee_network <-  network::network(as.matrix(net_links, directed=FALSE, loops=TRUE))
-  params$ee_density <- network::network.density(ee_network)
+  ee_network <-  igraph::graph_from_adjacency_matrix(as.matrix(net_links), diag = FALSE)
+  params$ee_density <- igraph::edge_density(ee_network)
+  params$ee_centr_betw <- igraph::centr_betw(ee_network)$centralization
+  params$ee_centr_degree <- igraph::centr_degree(ee_network, mode = "in")$centralization # got in here because no directionality in network - rethink if we have directionality
+  params$ee_edge_per_node_mean <- mean(igraph::degree(ee_network, mode = "in"))
+  params$ee_edge_per_node_sd <- sd(igraph::degree(ee_network, mode = "in"))
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%
