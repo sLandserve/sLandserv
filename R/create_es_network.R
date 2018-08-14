@@ -67,13 +67,12 @@ create_es_network <- function(ls_supply,
   }
 
   # calculate some network metrics
-  es_network <-  igraph::graph_from_adjacency_matrix(as.matrix(net_links), diag = FALSE)
-  es_network <- igraph::as.undirected(es_network)
+  es_network <-  igraph::graph_from_incidence_matrix(net_links, directed = FALSE)
   params$es_density <- igraph::edge_density(es_network)
   params$es_centr_betw <- igraph::centr_betw(es_network)$centralization
-  params$es_centr_degree <- igraph::centr_degree(es_network, mode = "in")$centralization # got in here because no directionality in network - rethink if we have directionality
-  params$es_edge_per_node_mean <- mean(igraph::degree(es_network, mode = "in"))
-  params$es_edge_per_node_sd <- sd(igraph::degree(es_network, mode = "in"))
+  params$es_centr_degree <- igraph::centr_degree(es_network)$centralization
+  params$es_edge_per_node_mean <- mean(igraph::degree(es_network))
+  params$es_edge_per_node_sd <- sd(igraph::degree(es_network))
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%
