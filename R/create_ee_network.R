@@ -47,7 +47,7 @@ create_ee_network <- function(ls_supply,
   params$num_supply <- nrow(ls_supply)
 
   # calculate network density
-  ee_network <-  igraph::graph_from_adjacency_matrix(net_links, diag = FALSE, directed = FALSE)
+  ee_network <-  igraph::graph_from_adjacency_matrix(net_links, diag = FALSE, mode = "undirected")
   params$ee_density <- igraph::edge_density(ee_network)
   params$ee_centr_betw <- igraph::centr_betw(ee_network)$centralization
   params$ee_centr_degree <- igraph::centr_degree(ee_network)$centralization
