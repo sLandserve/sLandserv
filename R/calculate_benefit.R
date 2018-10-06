@@ -21,13 +21,13 @@
 #'
 #'@export
 
-calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma, params = NULL) {
+calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma, params = NULL, lambda = 1, phi = 1) {
 
   # if no parameters are input, start the table here
   if(is.null(params)) {
-    params <- data.frame(rival = rival, alpha = alpha, beta = beta, gamma = gamma)
+    params <- data.frame(rival = rival, alpha = alpha, beta = beta, gamma = gamma, lambda = lambda, phi = phi)
   } else {
-    params <- data.frame(params, rival = rival, alpha = alpha, beta = beta, gamma = gamma)
+    params <- data.frame(params, rival = rival, alpha = alpha, beta = beta, gamma = gamma, lambda = lambda, phi = phi)
   }
 
   # if there is no social-ecological network, escape function and return 0
@@ -43,14 +43,14 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
 
   connected_supply <- ee_network %>%
     dplyr::filter(link == 1) %>%
-    dplyr::mutate(area_node2 = area_node2^alpha) %>%
+    dplyr::mutate(area_node2 = area_node2) %>%
     dplyr::group_by(node1) %>%
     dplyr::summarise(connected_supply = sum(area_node2))
 
   supply <- dplyr::left_join(supply, connected_supply) %>%
     dplyr::mutate(connected_supply = dplyr::case_when(is.na(connected_supply) ~ 0,
                                                TRUE ~ connected_supply)) %>%
-    dplyr::mutate(supply = (1-beta)*area_node1^alpha + beta*connected_supply)
+    dplyr::mutate(supply = lambda*exp(beta*connected_supply)*area_node1^alpha)
 
   # 2. calculate per node benefit ----
   demand <- es_network %>%
@@ -72,14 +72,14 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
       dplyr::mutate(supply = supply*prop_benefit) %>%
       dplyr::group_by(node_demand, area_demand) %>%
       dplyr::summarise(supply = sum(supply)) %>%
-      dplyr::mutate(benefit = (area_demand / gamma) * (1 - exp(-gamma * supply)))
+      dplyr::mutate(benefit = phi*area_demand*supply^(1 - gamma) / (1 - gamma))
 
   } else {
     # non-rival
     benefit <- demand %>%
       dplyr::group_by(node_demand, area_demand) %>%
       dplyr::summarise(supply = sum(supply)) %>%
-      dplyr::mutate(benefit = (area_demand / gamma) * (1 - exp(-gamma*supply)))
+      dplyr::mutate(benefit = phi*area_demand*supply^(1 - gamma) / (1 - gamma))
   }
 
   # 3. calculate total benefit ----
