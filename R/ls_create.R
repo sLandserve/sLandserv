@@ -24,7 +24,7 @@
 #'
 #'@return A list containing a raster of the supply, demand, and if appropriate (p_supply +
 #'  p_demand != 1) neutral landcover types, a polygon containing the supply patches, a
-#'  polygon containing the demand patches and the parameters used to generate it
+#'  polygon containing the demand patches, and the parameters used to generate it
 #'
 #'@keywords ecosystem services, spatial, social ecological system, neutral landscape model
 #'
@@ -46,9 +46,10 @@ ls_create <- function(nrow,
 
   params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter)
 
-  # create a gradient surface
-  g <- NLMR::nlm_planargradient(ncol,
+  # create a gradient surface for supply and a mirror image gradient surface for demand
+  g_supply <- NLMR::nlm_planargradient(ncol,
                           nrow)
+  g_demand <- 1 - g_supply
 
   # create supply and demand surfaces
   # here we control the fragmentation and the amount
@@ -62,28 +63,31 @@ ls_create <- function(nrow,
                     verbose = FALSE)
 
   # create the analysis landscape: this takes 3 steps:
-  # 1. merge supply and demand
-  ls <- landscapetools::util_merge(supply, demand)
-  # 2. merge gradient
-  ls <- landscapetools::util_merge(ls,
-                   g,
+  # 1. merge gradients
+  ls_supply <- landscapetools::util_merge(supply,
+                   g_supply,
                    scalingfactor = 1 - inter)
-  # 3. classify
-  ls <- landscapetools::util_classify(ls,
-                      weighting = c(p_supply, 1 - (p_supply + p_demand), p_demand),
-                      level_names = c("supply", "neutral", "demand"))
+  ls_demand <- landscapetools::util_merge(demand,
+                   g_demand,
+                   scalingfactor = 1 - inter)
+  # 2. classify
+  ls_supply <- landscapetools::util_classify(ls_supply,
+                      weighting = c(1 - p_supply, p_supply),
+                      level_names = c("neutral", "supply"))
+  ls_demand <- landscapetools::util_classify(ls_demand,
+                      weighting = c(1 - p_demand, p_demand),
+                      level_names = c("neutral", "demand"))
 
-  # 4. polygonise and split out supply and demand
-  ls_poly <- raster::rasterToPolygons(ls, dissolve=TRUE) %>%
+  # 3. polygonise and split out supply and demand
+  supply_poly <- raster::rasterToPolygons(ls_supply, dissolve=TRUE) %>%
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
     dplyr::mutate(patch_area = sf::st_area(.))
 
-  ls_supply <- dplyr::filter(ls_poly, layer == 0) %>%
-    dplyr::select(-layer)
+  demand_poly <- raster::rasterToPolygons(ls_demand, dissolve=TRUE) %>%
+    raster::disaggregate() %>%
+    sf::st_as_sf() %>%
+    dplyr::mutate(patch_area = sf::st_area(.))
 
-  ls_demand <- dplyr::filter(ls_poly, layer == 2) %>%
-    dplyr::select(-layer)
-
-  return(list(ls = ls, ls_supply = ls_supply, ls_demand = ls_demand, params = data.frame(params)))
+  return(list(ls_supply = ls_supply, ls_demand = ls_demand, supply_poly = supply_poly, demand_poly = demand_poly, params = data.frame(params)))
 }
