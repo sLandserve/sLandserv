@@ -22,9 +22,8 @@
 #'  completely interspersed)
 #'
 #'
-#'@return A list containing a raster of the supply, demand, and if appropriate (p_supply +
-#'  p_demand != 1) neutral landcover types, a polygon containing the supply patches, a
-#'  polygon containing the demand patches, and the parameters used to generate it
+#'@return A list containing a polygon containing the supply patches, a
+#'  polygon containing the demand patches, and the parameters used to generate them
 #'
 #'@keywords ecosystem services, spatial, social ecological system, neutral landscape model
 #'
@@ -79,15 +78,19 @@ ls_create <- function(nrow,
                       level_names = c("neutral", "demand"))
 
   # 3. polygonise and split out supply and demand
-  supply_poly <- raster::rasterToPolygons(ls_supply, dissolve=TRUE) %>%
+  ls_supply <- raster::rasterToPolygons(ls_supply, dissolve=TRUE) %>%
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
-    dplyr::mutate(patch_area = sf::st_area(.))
+    dplyr::mutate(patch_area = sf::st_area(.)) %>%
+    dplyr::filter(layer == 1) %>%
+    dplyr::select(-layer)
 
-  demand_poly <- raster::rasterToPolygons(ls_demand, dissolve=TRUE) %>%
+  ls_demand <- raster::rasterToPolygons(ls_demand, dissolve=TRUE) %>%
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
-    dplyr::mutate(patch_area = sf::st_area(.))
+    dplyr::mutate(patch_area = sf::st_area(.)) %>%
+    dplyr::filter(layer == 1) %>%
+    dplyr::select(-layer)
 
-  return(list(ls_supply = ls_supply, ls_demand = ls_demand, supply_poly = supply_poly, demand_poly = demand_poly, params = data.frame(params)))
+  return(list(ls_supply = ls_supply, ls_demand = ls_demand, params = data.frame(params)))
 }
