@@ -20,6 +20,8 @@
 #'@keywords ecosystem services, spatial, social ecological system, neutral landscape model
 #'
 #'@export
+#'
+#'@import magrittr
 
 calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma, params = NULL, lambda = 1, phi = 1) {
 
@@ -84,6 +86,7 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
 
   # 3. calculate total benefit ----
   params$benefit <- sum(benefit$benefit)
+  params$supply <- sum(benefit$supply)
 
   # 4. output parameters ----
   return(params)

@@ -22,6 +22,9 @@
 #'@keywords ecosystem services, spatial, ecological system, neutral landscape model
 #'
 #'@export
+#'
+#'@import magrittr
+
 create_es_network <- function(ls_supply,
                               ls_demand,
                               es_thresh,
