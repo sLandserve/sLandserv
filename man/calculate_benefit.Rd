@@ -5,7 +5,7 @@
 \title{Calculate ecosystem service benefit from a network}
 \usage{
 calculate_benefit(ee_network, es_network, rival, alpha, beta, gamma,
-  params = NULL)
+  params = NULL, lambda = 1, phi = 1)
 }
 \arguments{
 \item{ee_network}{ecological-ecological network from which to calculate supply (created using `create_ee_network`)}

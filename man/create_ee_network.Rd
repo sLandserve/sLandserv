@@ -4,7 +4,8 @@
 \alias{create_ee_network}
 \title{Create ecological-ecological networks}
 \usage{
-create_ee_network(ls_supply, ee_thresh, supply_area, params = NULL)
+create_ee_network(ls_supply, ee_thresh, supply_area, e2e = TRUE,
+  params = NULL)
 }
 \arguments{
 \item{ls_supply}{polygon containing ecosystem service supply areas}
@@ -12,6 +13,8 @@ create_ee_network(ls_supply, ee_thresh, supply_area, params = NULL)
 \item{ee_thresh}{distance threshold for the ecological-ecological links}
 
 \item{supply_area}{name of the column containing the supply area measure}
+
+\item{e2e}{logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)}
 
 \item{params}{vector containing the parameters used to generate the landscape if landscape is simulated (default = NULL)}
 }

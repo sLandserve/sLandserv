@@ -4,8 +4,8 @@
 \alias{create_es_network}
 \title{Create social-ecological networks}
 \usage{
-create_es_network(ls_supply, ls_demand, es_thresh, supply_area, demand_area,
-  params = NULL)
+create_es_network(ls_supply, ls_demand, es_thresh, supply_area,
+  demand_area, e2e = TRUE, params = NULL)
 }
 \arguments{
 \item{ls_supply}{polygon containing ecosystem service supply areas}
@@ -16,7 +16,9 @@ create_es_network(ls_supply, ls_demand, es_thresh, supply_area, demand_area,
 
 \item{supply_area}{name of the column containing the supply area measure}
 
-\item{demand_area}{name of the column containing the demand area measure}
+\item{demand_area}{name of the column containing the demand area measure
+
+#'@param e2e logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)}
 
 \item{params}{vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)}
 }

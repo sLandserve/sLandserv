@@ -25,9 +25,8 @@ the most fragmented)}
 completely interspersed)}
 }
 \value{
-A list containing a raster of the supply, demand, and if appropriate (p_supply +
- p_demand != 1) neutral landcover types, a polygon containing the supply patches, a
- polygon containing the demand patches and the parameters used to generate it
+A list containing a polygon containing the supply patches, a
+ polygon containing the demand patches, and the parameters used to generate them
 }
 \description{
 `ls_create` simulates ecosystem service supply and demand landscapes based

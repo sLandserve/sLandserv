@@ -9,6 +9,8 @@
 #'
 #'@param supply_area name of the column containing the supply area measure
 #'
+#'@param e2e logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)
+#'
 #'@param params vector containing the parameters used to generate the landscape if landscape is simulated (default = NULL)
 #'
 #'@return A list containing the network (and its attributes) and the parameters used to create the network
@@ -19,6 +21,7 @@
 create_ee_network <- function(ls_supply,
                               ee_thresh,
                               supply_area,
+                              e2e = TRUE,
                               params = NULL) {
 
   # if no parameters are input, start the table here
@@ -36,10 +39,12 @@ create_ee_network <- function(ls_supply,
     dplyr::rename(area = !!supply_area)
 
   # calculate all pairwise distances
-  sf::st_agr(ls_supply) = "constant" # this removes the warning message
-  pts <- sf::st_centroid(ls_supply)
-  net_links <- sf::st_distance(pts)
+  if(!e2e) {
+    sf::st_agr(ls_supply) = "constant" # this removes the warning message
+    ls_supply <- sf::st_centroid(ls_supply)
+  }
 
+  net_links <- sf::st_distance(ls_supply)
   ee_thresh <- ifelse(is.na(ee_thresh), -1, ee_thresh)
   net_links <- ifelse(net_links <= ee_thresh, 1, 0)
 

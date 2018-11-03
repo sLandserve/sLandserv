@@ -13,6 +13,8 @@
 #'
 #'@param demand_area name of the column containing the demand area measure
 #'
+#'#'@param e2e logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)
+#'
 #'@param params vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)
 #'
 #'@return A list containing the network (and its attributes) and the parameters used to create the network
@@ -25,6 +27,7 @@ create_es_network <- function(ls_supply,
                               es_thresh,
                               supply_area,
                               demand_area,
+                              e2e = TRUE,
                               params = NULL) {
 
   # if no parameters are input, start the table here
@@ -45,12 +48,17 @@ create_es_network <- function(ls_supply,
     dplyr::rename(area = !!demand_area)
 
   # calculate all pairwise distances
-  sf::st_agr(ls_supply) = "constant" # this removes the warning message
-  sf::st_agr(ls_demand) = "constant" # this removes the warning message
-  pts_supply <- sf::st_centroid(ls_supply)
-  pts_demand <- sf::st_centroid(ls_demand)
-  net_links <- sf::st_distance(pts_supply, pts_demand)
 
+  # if e2e is false, convert to centroid points before calculating distances
+  if(!e2e) {
+    sf::st_agr(ls_supply) = "constant" # this removes the warning message
+    sf::st_agr(ls_demand) = "constant" # this removes the warning message
+    ls_supply <- sf::st_centroid(ls_supply)
+    ls_demand <- sf::st_centroid(ls_demand)
+
+  }
+
+  net_links <- sf::st_distance(ls_supply, ls_demand)
   net_links <- ifelse(net_links <= es_thresh, 1, 0)
 
   #number of supply nodes
