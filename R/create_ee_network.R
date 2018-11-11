@@ -39,7 +39,8 @@ create_ee_network <- function(ls_supply,
 
   # add on an ID column and rename the area column
   ls_supply <- dplyr::mutate(ls_supply, ID = 1:n()) %>%
-    dplyr::rename(area = !!supply_area)
+    dplyr::rename(area = !!supply_area) %>%
+    sf::st_as_sf()
 
   # calculate all pairwise distances
   if(!e2e) {
