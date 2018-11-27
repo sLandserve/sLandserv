@@ -49,7 +49,7 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
     dplyr::group_by(node1) %>%
     dplyr::summarise(connected_supply = sum(area_node2))
 
-  supply <- dplyr::left_join(supply, connected_supply) %>%
+  supply <- dplyr::left_join(supply, connected_supply, by = "node1") %>%
     dplyr::mutate(connected_supply = dplyr::case_when(is.na(connected_supply) ~ 0,
                                                TRUE ~ connected_supply)) %>%
     dplyr::mutate(supply = lambda*exp(beta*connected_supply)*area_node1^alpha)
