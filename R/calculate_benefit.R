@@ -32,12 +32,6 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
     params <- data.frame(params, rival = rival, alpha = alpha, beta = beta, gamma = gamma, lambda = lambda, phi = phi)
   }
 
-  # if there is no social-ecological network, escape function and return 0
-  if(!is(es_network, "data.frame")) {
-    params$benefit <- 0
-    return(params)
-  }
-
   # 1. calculate per node supply ----
   supply <- ee_network %>%
     dplyr::group_by(node1) %>%
@@ -53,6 +47,13 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
     dplyr::mutate(connected_supply = dplyr::case_when(is.na(connected_supply) ~ 0,
                                                TRUE ~ connected_supply)) %>%
     dplyr::mutate(supply = lambda*exp(beta*connected_supply)*area_node1^alpha)
+
+  # if there is no social-ecological network, escape function and return 0
+  if(!is(es_network, "data.frame")) {
+    params$benefit <- 0
+    params$supply <- sum(benefit$supply)
+    return(params)
+  }
 
   # 2. calculate per node benefit ----
   demand <- es_network %>%
