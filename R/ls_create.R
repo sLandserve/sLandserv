@@ -47,13 +47,14 @@ ls_create <- function(nrow,
 
   params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter)
 
-  # create a gradient surface for supply and a mirror image gradient surface for demand
+  # create a gradient surface for supply and then a gradient surface for demand
+  #relative to the supply gradient based on the level of interspersion
   g_supply <- NLMR::nlm_planargradient(ncol,
                           nrow)
-  g_demand <- 1 - g_supply
+  g_demand <- 0.5 + ((-1 + inter * 2) * (g_supply - 0.5))
 
   # create supply and demand surfaces
-  # here we control the fragmentation and the amount
+  # here we control the level of fragmentation
   supply <- NLMR::nlm_mpd(ncol,
                     nrow,
                     roughness = f_supply,
@@ -64,13 +65,13 @@ ls_create <- function(nrow,
                     verbose = FALSE)
 
   # create the analysis landscape: this takes 3 steps:
-  # 1. merge gradients
+  # 1. merge with gradients
   ls_supply <- landscapetools::util_merge(supply,
                    g_supply,
-                   scalingfactor = 1 - inter)
+                   scalingfactor = 1)
   ls_demand <- landscapetools::util_merge(demand,
                    g_demand,
-                   scalingfactor = 1 - inter)
+                   scalingfactor = 1)
   # 2. classify
   ls_supply <- landscapetools::util_classify(ls_supply,
                       weighting = c(1 - p_supply, p_supply),
@@ -84,14 +85,14 @@ ls_create <- function(nrow,
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
     dplyr::mutate(patch_area = sf::st_area(.)) %>%
-    dplyr::filter(layer == 1) %>%
+    dplyr::filter(layer == 2) %>%
     dplyr::select(-layer)
 
   ls_demand <- raster::rasterToPolygons(ls_demand, dissolve=TRUE) %>%
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
     dplyr::mutate(patch_area = sf::st_area(.)) %>%
-    dplyr::filter(layer == 1) %>%
+    dplyr::filter(layer == 2) %>%
     dplyr::select(-layer)
 
   return(list(ls_supply = ls_supply, ls_demand = ls_demand, params = data.frame(params)))
