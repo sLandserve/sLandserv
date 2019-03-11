@@ -64,7 +64,7 @@ create_es_network <- function(ls_supply,
   net_links <- sf::st_distance(ls_supply, ls_demand)
   net_links <- ifelse(net_links <= es_thresh, 1, 0)
 
-  #number of supply nodes
+  #number of demand nodes
   params$num_demand <- nrow(ls_demand)
 
   # escape from function and return NA if no social-ecological links
