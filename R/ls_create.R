@@ -2,7 +2,7 @@
 #'
 #'@description `ls_create` simulates ecosystem service supply and demand landscapes based
 #'  on a number of parameters: proportion of supply/demand; fragmentation of
-#'  supply/demand; interspersion of supply/demand
+#'  supply/demand; steepness of supply gradient; interspersion of supply/demand
 #'
 #'@param nrow Number of rows in the raster
 #'

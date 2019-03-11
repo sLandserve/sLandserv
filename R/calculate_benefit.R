@@ -46,12 +46,13 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
   supply <- dplyr::left_join(supply, connected_supply, by = "node1") %>%
     dplyr::mutate(connected_supply = dplyr::case_when(is.na(connected_supply) ~ 0,
                                                TRUE ~ connected_supply)) %>%
-    dplyr::mutate(supply = lambda*exp(beta*connected_supply)*area_node1^alpha)
+    dplyr::mutate(supply = lambda * exp(beta * connected_supply) * area_node1 ^ alpha)
 
   # if there is no social-ecological network, escape function and return 0
+  # for benefit
   if(!is(es_network, "data.frame")) {
     params$benefit <- 0
-    params$supply <- sum(benefit$supply)
+    params$supply <- sum(supply$supply)
     return(params)
   }
 
@@ -72,17 +73,17 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
       dplyr::mutate(prop_benefit = 1 / connected_demand_area) %>%
       dplyr::group_by(node_demand, area_demand, node_supply, supply) %>%
       dplyr::summarise(prop_benefit = sum(prop_benefit)) %>%
-      dplyr::mutate(supply = supply*prop_benefit) %>%
+      dplyr::mutate(supply = supply * prop_benefit) %>%
       dplyr::group_by(node_demand, area_demand) %>%
       dplyr::summarise(supply = sum(supply)) %>%
-      dplyr::mutate(benefit = phi*area_demand*supply^(1 - gamma) / (1 - gamma))
+      dplyr::mutate(benefit = phi * area_demand * supply ^ (1 - gamma) / (1 - gamma))
 
   } else {
     # non-rival
     benefit <- demand %>%
       dplyr::group_by(node_demand, area_demand) %>%
       dplyr::summarise(supply = sum(supply)) %>%
-      dplyr::mutate(benefit = phi*area_demand*supply^(1 - gamma) / (1 - gamma))
+      dplyr::mutate(benefit = phi * area_demand *supply ^ (1 - gamma) / (1 - gamma))
   }
 
   # 3. calculate total benefit ----
