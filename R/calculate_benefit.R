@@ -83,12 +83,12 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
     benefit <- demand %>%
       dplyr::group_by(node_demand, area_demand) %>%
       dplyr::summarise(supply = sum(supply)) %>%
-      dplyr::mutate(benefit = phi * area_demand *supply ^ (1 - gamma) / (1 - gamma))
+      dplyr::mutate(benefit = phi * area_demand * supply ^ (1 - gamma) / (1 - gamma))
   }
 
   # 3. calculate total benefit ----
   params$benefit <- sum(benefit$benefit)
-  params$supply <- sum(benefit$supply)
+  params$supply <- sum(supply$supply)
 
   # 4. output parameters ----
   return(params)
