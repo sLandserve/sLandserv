@@ -18,7 +18,7 @@
 #'@param f_demand Fragmentation level of the ES supply (in the range [0, 1] with 1 being
 #'  the most fragmented)
 #'
-#'@param grad Steepness of spatial gradient for supply (in the range  [0, 1] with 1 being
+#'@param grad Steepness of spatial gradient for supply (in the range [0, 1] with 1 being
 #'  the steepest gradient)
 #'
 #'@param inter Interpersion between ES supply and demand across the spatial gradient (in

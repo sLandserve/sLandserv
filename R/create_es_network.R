@@ -80,8 +80,8 @@ create_es_network <- function(ls_supply,
   # calculate some network metrics
   es_network <-  igraph::graph_from_incidence_matrix(net_links, directed = FALSE)
   params$es_density <- igraph::edge_density(es_network)
-  params$es_centr_betw <- igraph::centr_betw(es_network)$centralization
-  params$es_centr_degree <- igraph::centr_degree(es_network)$centralization
+  params$es_centr_betw <- igraph::centr_betw(es_network, directed = FALSE)$centralization
+  params$es_centr_degree <- igraph::centr_degree(es_network, loops = FALSE)$centralization
   params$es_edge_per_node_mean <- mean(igraph::degree(es_network))
   params$es_edge_per_node_sd <- sd(igraph::degree(es_network))
 
