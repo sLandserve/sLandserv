@@ -58,10 +58,11 @@ create_ee_network <- function(ls_supply,
   # calculate network density
   ee_network <-  igraph::graph_from_adjacency_matrix(net_links, diag = TRUE, mode = "undirected")
   params$ee_density <- igraph::edge_density(ee_network, loops = TRUE)
-  params$ee_centr_betw <- igraph::centr_betw(ee_network, directed = FALSE)$centralization
-  params$ee_centr_degree <- igraph::centr_degree(ee_network, loops = TRUE)$centralization
-  params$ee_edge_per_node_mean <- mean(igraph::degree(ee_network, loops = TRUE))
-  params$ee_edge_per_node_sd <- sd(igraph::degree(ee_network, loops = TRUE))
+  param$ee_centr_close <- igraph::centr_clo(ee_network, normalized = TRUE)$centralization
+  params$ee_centr_betw <- igraph::centr_betw(ee_network, directed = FALSE, normalized = TRUE)$centralization
+  params$ee_centr_degree <- igraph::centr_degree(ee_network, loops = TRUE, normalized = TRUE)$centralization
+  params$ee_edge_per_node_mean <- mean(igraph::degree(ee_network, loops = TRUE, normalized = TRUE))
+  params$ee_edge_per_node_sd <- sd(igraph::degree(ee_network, loops = TRUE, normalized = TRUE))
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%

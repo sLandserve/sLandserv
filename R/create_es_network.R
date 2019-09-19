@@ -70,6 +70,7 @@ create_es_network <- function(ls_supply,
   # escape from function and return NA if no social-ecological links
   if(sum(net_links) == 0) {
     params$es_density <- NA
+    param$es_centr_close <- NA
     params$es_centr_betw <- NA
     params$es_centr_degree <- NA
     params$es_edge_per_node_mean <- NA
@@ -78,12 +79,22 @@ create_es_network <- function(ls_supply,
   }
 
   # calculate some network metrics
-  es_network <-  igraph::graph_from_incidence_matrix(net_links, directed = FALSE)
-  params$es_density <- igraph::edge_density(es_network, loops = FALSE)
-  params$es_centr_betw <- igraph::centr_betw(es_network, directed = FALSE)$centralization
-  params$es_centr_degree <- igraph::centr_degree(es_network, loops = FALSE)$centralization
-  params$es_edge_per_node_mean <- mean(igraph::degree(es_network, loops = FALSE))
-  params$es_edge_per_node_sd <- sd(igraph::degree(es_network, loops = FALSE))
+  es_network <-  igraph::graph_from_incidence_matrix(net_links, directed = FALSE, multiple = FALSE)
+  es_network$type <- igraph::bipartite_mapping(es_network)$type # identify the two modes in the bipartite network
+  # calculate density as the number of edges / total number of possible edges in the bipartite network
+  params$es_density <- igraph::gsize(es_netweork) / (length(which(g$type == TRUE)) * length(which(g$type == FALSE)))
+  param$es_centr_close <- igraph::centr_clo(es_network, normalized = FALSE)$centralization # need to work what the normalization constant is
+  params$es_centr_betw <- igraph::centr_betw(es_network, directed = FALSE, normalized = FALSE)$centralization # need to work what the normalization constant is
+  params$es_centr_degree <- igraph::centr_degree(ee_network, loops = FALSE, normalized = FALSE)$centralization # need to work what the normalization constant is
+  # edges per node based on degree centrality normalised by the number of possible edges
+  params$es_edge_per_node_mean <- mean(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[which(g$type == TRUE)] /
+                                                     length(g$type == FALSE),
+                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[which(g$type == FALSE)] /
+                                                     length(g$type == TRUE)))
+  params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[which(g$type == TRUE)] /
+                                                     length(g$type == FALSE),
+                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[which(g$type == FALSE)] /
+                                                     length(g$type == TRUE)))
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%
