@@ -192,7 +192,7 @@ create_es_network <- function(ls_supply,
                                                      sum(es_network$type))
 
   params$es_edge_per_node_sd_demand <- sd(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-                                                     sum(!es_network$type)))
+                                                     sum(!es_network$type))
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%
