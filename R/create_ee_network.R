@@ -38,7 +38,7 @@ create_ee_network <- function(ls_supply,
   if(is(ls_supply, "Spatial")) ls_supply <- sf::st_as_sf(ls_supply)
 
   # add on an ID column and rename the area column
-  ls_supply <- dplyr::mutate(ls_supply, ID = 1:n()) %>%
+  ls_supply <- dplyr::mutate(ls_supply, ID = 1:dplyr::n()) %>%
     dplyr::rename(area = !!supply_area) %>%
     sf::st_as_sf()
 

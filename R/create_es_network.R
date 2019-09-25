@@ -45,9 +45,9 @@ create_es_network <- function(ls_supply,
   if(is(ls_demand, "Spatial")) ls_demand <- sf::st_as_sf(ls_demand)
 
   # add on an ID column
-  ls_supply <- dplyr::mutate(ls_supply, ID = 1:n()) %>%
+  ls_supply <- dplyr::mutate(ls_supply, ID = 1:dplyr::n()) %>%
     dplyr::rename(area = !!supply_area)
-  ls_demand <- dplyr::mutate(ls_demand, ID = 1:n()) %>%
+  ls_demand <- dplyr::mutate(ls_demand, ID = 1:dplyr::n()) %>%
     dplyr::rename(area = !!demand_area)
 
   # calculate all pairwise distances
