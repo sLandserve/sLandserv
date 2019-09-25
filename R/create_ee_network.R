@@ -55,13 +55,25 @@ create_ee_network <- function(ls_supply,
   #number of supply nodes
   params$num_supply <- nrow(ls_supply)
 
-  # calculate network density
+  # calculate some network metrics
   ee_network <-  igraph::graph_from_adjacency_matrix(net_links, diag = TRUE, mode = "undirected")
+
+  # edge density
   params$ee_density <- igraph::edge_density(ee_network, loops = TRUE)
+
+  # closeness centralisation
   param$ee_centr_close <- igraph::centr_clo(ee_network, normalized = TRUE)$centralization
+
+  # betweenness centralisation
   params$ee_centr_betw <- igraph::centr_betw(ee_network, directed = FALSE, normalized = TRUE)$centralization
+
+  # degree centralisation
   params$ee_centr_degree <- igraph::centr_degree(ee_network, loops = TRUE, normalized = TRUE)$centralization
+
+  # mean edges per node
   params$ee_edge_per_node_mean <- mean(igraph::degree(ee_network, loops = TRUE, normalized = TRUE))
+
+  # sd edges per node
   params$ee_edge_per_node_sd <- sd(igraph::degree(ee_network, loops = TRUE, normalized = TRUE))
 
   # get network in correct format

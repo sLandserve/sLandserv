@@ -70,8 +70,12 @@ create_es_network <- function(ls_supply,
   # escape from function and return NA if no social-ecological links
   if(sum(net_links) == 0) {
     params$es_density <- NA
-    params$es_density_supply <- NA
-    params$es_density_demand <- NA
+    params$es_centr_close <- NA
+    params$es_centr_close_supply <- NA
+    params$es_centr_close_demand <- NA
+    params$es_centr_betw <- NA
+    params$es_centr_betw_supply <- NA
+    params$es_centr_betw_demand <- NA
     params$es_centr_degree <- NA
     params$es_centr_degree_supply <- NA
     params$es_centr_degree_demand <- NA
@@ -85,65 +89,108 @@ create_es_network <- function(ls_supply,
   }
 
   # calculate some network metrics for the entire network, the supply nodes, and the demand nodes
+  # the denominators for these indices for bipartite networks are taken from
+  # Borgatti & Everett (1997). Social Networks 19:243-269.
   es_network <-  igraph::graph_from_incidence_matrix(net_links, directed = FALSE, multiple = FALSE)
   # assign types to the network (supply = FALSE, demand = TRUE)
   es_network$type <- c(logical(length = nrow(net_links)), !logical(length = ncol(net_links)))
+  # calculate number of each node type
+  n_supply <- sum(!es_network$type)
+  n_demand <- sum(es_network$type)
+
+  # edge density
   # calculate density as the number of edges / total number of possible edges in the bipartite network
-  params$es_density <- igraph::gsize(es_network) / (sum(es_network$type)*sum(!es_network$type))
-  params$es_density_supply <- igraph::gsize(es_network) / (sum(!es_network$type))
-  params$es_density_demand <- igraph::gsize(es_network) / (sum(es_network$type))
+  params$es_density <- igraph::gsize(es_network) / (sum(es_network$type) * sum(!es_network$type))
 
-  # OLD LOGIC - NEED TO CHECK
-  # on assumption that each node of type a can have maximum degree = num nodes of type b
-  # for type a, there are N_a nodes each with degree = N_b ??
-  # for type b, there are N_b nodes each with degree = N_a ??
-  # so theoretical maximum degree centralisation for the whole graph is 2*N_a*N_b ??
-  # degree_tmax <- 2*sum(es_network$type)*sum(!es_network$type)
-  # degree_vals <- igraph::degree(es_network)
-  # params$es_centr_degree <- igraph::centralize(degree_vals, theoretical.max = degree_tmax, normalized = TRUE)
-  # edges per node based on degree centrality normalised by the number of possible edges
-  # params$es_edge_per_node_mean <- mean(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-  #                                                    sum(!es_network$type),
-  #                                        igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-  #                                                    sum(es_network$type)))
-  # params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-  #                                                    sum(!es_network$type),
-  #                                        igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-  #                                                    sum(es_network$type)))
+  # closeness centralisation
+  if (n_supply > n_demand){
+    close_tmax <- 2 * (n_demand - 1) * ((n_demand + n_supply - 2) / (3 * n_demand + 4 * n_supply - 8)) +
+                          2 * (n_supply - n_demand) * ((2 * n_demand - 1) / (5 * n_demand + 2 * n_supply - 6)) +
+                          2 * (n_demand - 1) * ((n_supply - 2) / (2 * n_demand + 3 * n_supply - 6)) +
+                          2 * ((n_demand - 1) / (n_supply + 4 * n_demand - 4))
+  } else {
+    close_tmax <- 2 * (n_supply - 1) * ((n_demand + n_supply - 4) / (3 * n_demand + 4 * n_supply - 8)) +
+                          2 * (n_supply - 1) * ((n_supply - 2) / (2 * n_demand + 3 * n_supply - 6)) +
+                          2 * (n_supply - 1) * ((n_demand - n_supply + 1) / (2 * n_demand + 3 * n_supply - 4))
+  }
+  if (n_supply > n_demand){
+    close_tmax_supply <- ((n_demand - 1) * (n_supply - 2)) / (2 * n_supply - 3) +
+                          ((n_demand - 1) * (n_supply - n_demand)) / (n_supply + n_demand - 2)
+  } else {
+    close_tmax_supply <- ((n_supply - 2) * (n_supply - 1)) / (2 * n_supply - 3)
+  }
+  if (n_demand > n_supply){
+    close_tmax_demand <- ((n_supply - 1) * (n_demand - 2)) / (2 * n_demand - 3) +
+                          ((n_supply - 1) * (n_demand - n_supply)) / (n_demand + n_supply - 2)
+  } else {
+    close_tmax_demand <- ((n_demand - 2) * (n_demand - 1)) / (2 * n_demand - 3)
+  }
+  close_vals <- igraph::closeness(es_network, normalized = FALSE)
+  close_vals_supply <- igraph::closeness(es_network, normalized = FALSE)[!es_network$type]
+  close_vals_demand <- igraph::closeness(es_network, normalized = FALSE)[es_network$type]
+  params$es_centr_close <- igraph::centralize(close_vals, theoretical.max = close_tmax, normalized = TRUE)
+  params$es_centr_close_supply <- igraph::centralize(close_vals_supply, theoretical.max = close_tmax_supply, normalized = TRUE)
+  params$es_centr_close_demand <- igraph::centralize(close_vals_demand, theoretical.max = close_tmax_demand, normalized = TRUE)
 
-  # NEW LOGIC - NEED TO CHECK
-  # for the whole network, maximum degree centralisation is when one node of the type with the lowest number of nodes
-  # is connected to all nodes of the other type and the other nodes of the type with the lowest number
-  # of nodes are connected to nothing; in this case the maximum degree centralisation (sum(d_max - d)) is
-  # max(N_a,N_b) * [max(N_a,N_b) - 1] + [min(N_a,N_b) - 1] * max(N_a,N_b)
-  degree_tmax <- max(sum(es_network$type),sum(!es_network$type))) * (1 - max(sum(es_network$type),sum(!es_network$type)))) +
-                 (min(sum(es_network$type),sum(!es_network$type))) - 1) * max(sum(es_network$type),sum(!es_network$type)))
-  # for only one node type, the maximum degree centralisation is when one node of focal type is connected to all nodes of
-  # the other type and all other nodes are connected to nothing; in this case the maximum degree centralisation (sum(d_max - d)) is
-  # (N_a - 1) * N_b for node type a and (N_b - 1) * N_a for node type b
-  degree_tmax_supply <- (sum(!es_network$type) - 1) * sum(es_network$type)
-  degree_tmax_demand <- (sum(es_network$type) - 1) * sum(!es_network$type)
+  # betweenness centralisation
+  if (n_supply > n_demand){
+    betw_tmax <- 2 * (n_supply - 1) * (n_demand - 1) * (n_supply + n_demand - 1) -
+                          (n_demand - 1) * (n_supply + n_demand - 2) -
+                          0.5 * (n_supply - n_demand) * (n_supply + 3 * n_demand - 3)
+  } else {
+    betw_tmax <- (0.5 * n_demand * (n_demand - 1) + 0.5 * (n_supply - 1) * (n_supply - 2) + (n_supply - 1) * (n_demand - 2)) *
+                          (n_supply + n_demand - 1) +
+                          (n_supply - 1)
+  }
+  if (n_supply > n_demand){
+    betw_tmax_supply <- 2 * (n_supply - 1) ^ 2 * (n_demand - 1)
+  } else {
+    betw_tmax_supply <- (n_supply - 1) *
+                          (0.5 * n_demand * (n_demand - 1) + 0.5 * (n_supply - 1) * (n_supply - 2) + (n_supply - 1) * (n_demand - 1))
+  }
+  if (n_demand > n_supply){
+    betw_tmax_demand <- 2 * (n_demand - 1) ^ 2 * (n_supply - 1)
+  } else {
+    betw_tmax_demand <- (n_demand - 1) *
+                          (0.5 * n_supply * (n_supply - 1) + 0.5 * (n_demand - 1) * (n_demand - 2) + (n_demand - 1) * (n_supply - 1))
+  }
+  betw_vals <- igraph::betweenness(es_network, directed = FALSE, normalized = FALSE)
+  betw_vals_supply <- igraph::betweenness(es_network, directed = FALSE, normalized = FALSE)[!es_network$type]
+  betw_vals_demand <- igraph::betweenness(es_network, directed = FALSE, normalized = FALSE)[es_network$type]
+  params$es_centr_betw <- igraph::centralize(betw_vals, theoretical.max = betw_tmax, normalized = TRUE)
+  params$es_centr_betw_supply <- igraph::centralize(betw_vals_supply, theoretical.max = betw_tmax_supply, normalized = TRUE)
+  params$es_centr_betw_demand <- igraph::centralize(betw_vals_demand, theoretical.max = betw_tmax_demand, normalized = TRUE)
+
+  # degree centralisation
+  degree_tmax <- (max(n_supply, n_demand) + min(n_supply, n_demand)) * max(n_supply, n_demand) -
+                    2 * (max(n_supply, n_demand) + min(n_supply, n_demand) - 1)
+  degree_tmax_supply <- (n_supply - 1) * (n_demand - 1)
+  degree_tmax_demand <- (n_supply - 1) * (n_demand - 1)
   degree_vals <- igraph::degree(es_network, loops = FALSE, normalized = FALSE)
   degree_vals_supply <- igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type]
   degree_vals_demand <- igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type]
   params$es_centr_degree <- igraph::centralize(degree_vals, theoretical.max = degree_tmax, normalized = TRUE)
   params$es_centr_degree_supply <- igraph::centralize(degree_vals_supply, theoretical.max = degree_tmax_supply, normalized = TRUE)
   params$es_centr_degree_demand <- igraph::centralize(degree_vals_demand, theoretical.max = degree_tmax_demand, normalized = TRUE)
-  # edges per node based on degree centrality normalised by the number of possible edges
+
+  # mean edges per node
   params$es_edge_per_node_mean <- mean(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-                                                     sum(!es_network$type),
-                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-                                                     sum(es_network$type)))
-  params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
                                                      sum(!es_network$type),
                                          igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
                                                      sum(es_network$type)))
   params$es_edge_per_node_mean_supply <- mean(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
                                                      sum(es_network$type))
-  params$es_edge_per_node_sd_supply <- sd(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-                                                     sum(es_network$type))
   params$es_edge_per_node_mean_demand <- mean(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
                                                      sum(!es_network$type))
+
+  # sd edges per node
+  params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
+                                                     sum(!es_network$type),
+                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
+                                                     sum(es_network$type)))
+  params$es_edge_per_node_sd_supply <- sd(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
+                                                     sum(es_network$type))
+
   params$es_edge_per_node_sd_demand <- sd(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
                                                      sum(!es_network$type)))
 
