@@ -80,11 +80,7 @@ create_es_network <- function(ls_supply,
     params$es_centr_degree_supply <- NA
     params$es_centr_degree_demand <- NA
     params$es_edge_per_node_mean <- NA
-    params$es_edge_per_node_mean_supply <- NA
-    params$es_edge_per_node_mean_demand <- NA
     params$es_edge_per_node_sd <- NA
-    params$es_edge_per_node_sd_supply <- NA
-    params$es_edge_per_node_sd_demand <- NA
     return(list(network = NA, params = params))
   }
 
@@ -100,7 +96,7 @@ create_es_network <- function(ls_supply,
 
   # edge density
   # calculate density as the number of edges / total number of possible edges in the bipartite network
-  params$es_density <- igraph::gsize(es_network) / (sum(es_network$type) * sum(!es_network$type))
+  params$es_density <- igraph::gsize(es_network) / (n_supply * n_demand)
 
   # closeness centralisation
   if (n_supply > n_demand){
@@ -174,25 +170,16 @@ create_es_network <- function(ls_supply,
   params$es_centr_degree_demand <- igraph::centralize(degree_vals_demand, theoretical.max = degree_tmax_demand, normalized = TRUE)
 
   # mean edges per node
-  params$es_edge_per_node_mean <- mean(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-                                                     sum(!es_network$type),
-                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-                                                     sum(es_network$type)))
-  params$es_edge_per_node_mean_supply <- mean(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-                                                     sum(es_network$type))
-  params$es_edge_per_node_mean_demand <- mean(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-                                                     sum(!es_network$type))
+  params$es_edge_per_node_mean <- mean(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
+                                                     n_demand,
+                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
+                                                     n_supply))
 
   # sd edges per node
-  params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-                                                     sum(!es_network$type),
-                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-                                                     sum(es_network$type)))
-  params$es_edge_per_node_sd_supply <- sd(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
-                                                     sum(es_network$type))
-
-  params$es_edge_per_node_sd_demand <- sd(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
-                                                     sum(!es_network$type))
+  params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
+                                                     n_demand,
+                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
+                                                     n_supply))
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%
