@@ -62,7 +62,7 @@ create_ee_network <- function(ls_supply,
   params$ee_density <- igraph::edge_density(ee_network, loops = TRUE)
 
   # closeness centralisation
-  param$ee_centr_close <- igraph::centr_clo(ee_network, normalized = TRUE)$centralization
+  params$ee_centr_close <- igraph::centr_clo(ee_network, normalized = TRUE)$centralization
 
   # betweenness centralisation
   params$ee_centr_betw <- igraph::centr_betw(ee_network, directed = FALSE, normalized = TRUE)$centralization
