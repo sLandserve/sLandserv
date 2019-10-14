@@ -61,10 +61,10 @@ create_ee_network <- function(ls_supply,
   # edge density
   params$ee_density <- igraph::edge_density(ee_network, loops = TRUE)
 
-  # closeness centralisation
+  # closeness centralisation - note this is only valid for a fully connected network
   params$ee_centr_close <- igraph::centr_clo(ee_network, normalized = TRUE)$centralization
 
-  # betweenness centralisation
+  # betweenness centralisation - note this is only valid for a fully connected network
   params$ee_centr_betw <- igraph::centr_betw(ee_network, directed = FALSE, normalized = TRUE)$centralization
 
   # degree centralisation

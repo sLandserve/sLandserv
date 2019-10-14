@@ -98,7 +98,7 @@ create_es_network <- function(ls_supply,
   # calculate density as the number of edges / total number of possible edges in the bipartite network
   params$es_density <- igraph::gsize(es_network) / (n_supply * n_demand)
 
-  # closeness centralisation
+  # closeness centralisation - note this is only valid for a fully connected network
   if (n_supply > n_demand){
     close_tmax <- 2 * (n_demand - 1) * ((n_demand + n_supply - 2) / (3 * n_demand + 4 * n_supply - 8)) +
                           2 * (n_supply - n_demand) * ((2 * n_demand - 1) / (5 * n_demand + 2 * n_supply - 6)) +
@@ -128,7 +128,7 @@ create_es_network <- function(ls_supply,
   params$es_centr_close_supply <- igraph::centralize(close_vals_supply, theoretical.max = close_tmax_supply, normalized = TRUE)
   params$es_centr_close_demand <- igraph::centralize(close_vals_demand, theoretical.max = close_tmax_demand, normalized = TRUE)
 
-  # betweenness centralisation
+  # betweenness centralisation - note this is only valid for a fully connected network
   if (n_supply > n_demand){
     betw_tmax <- 2 * (n_supply - 1) * (n_demand - 1) * (n_supply + n_demand - 1) -
                           (n_demand - 1) * (n_supply + n_demand - 2) -
@@ -159,9 +159,9 @@ create_es_network <- function(ls_supply,
 
   # degree centralisation
   degree_tmax <- (max(n_supply, n_demand) + min(n_supply, n_demand)) * max(n_supply, n_demand) -
-                    2 * (max(n_supply, n_demand) + min(n_supply, n_demand) - 1)
-  degree_tmax_supply <- (n_supply - 1) * (n_demand - 1)
-  degree_tmax_demand <- (n_supply - 1) * (n_demand - 1)
+                    2 * (max(n_supply, n_demand) + min(n_supply, n_demand) - 1) # bug - need to modify to allow for disconnected networks
+  degree_tmax_supply <- (n_supply - 1) * (n_demand) # note modified from Borgatti & Everett (1997) to allow for a disconnected network
+  degree_tmax_demand <- (n_supply) * (n_demand - 1) # note modified from Borgatti & Everett (1997) to allow for a disconnected network
   degree_vals <- igraph::degree(es_network, loops = FALSE, normalized = FALSE)
   degree_vals_supply <- igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type]
   degree_vals_demand <- igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type]
