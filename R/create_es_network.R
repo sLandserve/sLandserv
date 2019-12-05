@@ -3,19 +3,19 @@
 #'@description `create_es_network` takes as input a spatial data layer (either real data or result of
 #'  `ls_create`) and derives the underlying supply (ecological-ecological) network
 #'
-#'@param ls_supply polygon containing ecosystem service supply areas
+#'@param ls_supply Polygons containing ecosystem service supply areas
 #'
-#'@param ls_demand polygon containing ecosystem service demand areas
+#'@param ls_demand Polygons containing ecosystem service demand areas
 #'
-#'@param es_thresh distance threshold for the social-ecological links
+#'@param es_thresh Distance threshold for the social-ecological links
 #'
-#'@param supply_area name of the column containing the supply area measure
+#'@param supply_area Name of the column containing the supply area measure
 #'
-#'@param demand_area name of the column containing the demand area measure
+#'@param demand_area Name of the column containing the demand area measure
 #'
-#'#'@param e2e logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)
+#'#'@param e2e Logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)
 #'
-#'@param params vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)
+#'@param params Vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)
 #'
 #'@return A list containing the network (and its attributes) and the parameters used to create the network
 #'
@@ -84,8 +84,8 @@ create_es_network <- function(ls_supply,
     return(list(network = NA, params = params))
   }
 
-  # calculate some network metrics for the entire network, the supply nodes, and the demand nodes
-  # the denominators for these indices for bipartite networks are taken from
+  # calculate some network metrics for the entire network, just the supply nodes, and just the demand nodes
+  # with the normalisation denominators for these indices for bipartite networks taken from
   # Borgatti & Everett (1997). Social Networks 19:243-269.
   es_network <-  igraph::graph_from_incidence_matrix(net_links, directed = FALSE, multiple = FALSE)
   # assign types to the network (supply = FALSE, demand = TRUE)
@@ -95,10 +95,10 @@ create_es_network <- function(ls_supply,
   n_demand <- sum(es_network$type)
 
   # edge density
-  # calculate density as the number of edges / total number of possible edges in the bipartite network
+  # calculate edge density as the number of edges / total number of possible edges in the bipartite network
   params$es_density <- igraph::gsize(es_network) / (n_supply * n_demand)
 
-  # closeness centralisation - note this is only valid for a fully connected network
+  # closeness centralisation - note this is only valid for a fully connected network, so use with caution
   if (n_supply > n_demand){
     close_tmax <- 2 * (n_demand - 1) * ((n_demand + n_supply - 2) / (3 * n_demand + 4 * n_supply - 8)) +
                           2 * (n_supply - n_demand) * ((2 * n_demand - 1) / (5 * n_demand + 2 * n_supply - 6)) +
@@ -128,7 +128,7 @@ create_es_network <- function(ls_supply,
   params$es_centr_close_supply <- igraph::centralize(close_vals_supply, theoretical.max = close_tmax_supply, normalized = TRUE)
   params$es_centr_close_demand <- igraph::centralize(close_vals_demand, theoretical.max = close_tmax_demand, normalized = TRUE)
 
-  # betweenness centralisation - note this is only valid for a fully connected network
+  # betweenness centralisation - note this is only valid for a fully connected network, so use with caution
   if (n_supply > n_demand){
     betw_tmax <- 2 * (n_supply - 1) * (n_demand - 1) * (n_supply + n_demand - 1) -
                           (n_demand - 1) * (n_supply + n_demand - 2) -
@@ -159,7 +159,7 @@ create_es_network <- function(ls_supply,
 
   # degree centralisation
   degree_tmax <- (max(n_supply, n_demand) + min(n_supply, n_demand)) * max(n_supply, n_demand) -
-                    2 * (max(n_supply, n_demand) + min(n_supply, n_demand) - 1) # bug - need to modify to allow for disconnected networks
+                    2 * (max(n_supply, n_demand) + min(n_supply, n_demand) - 1) # BUG - need to modify to allow for disconnected networks
   degree_tmax_supply <- (n_supply - 1) * (n_demand) # note modified from Borgatti & Everett (1997) to allow for a disconnected network
   degree_tmax_demand <- (n_supply) * (n_demand - 1) # note modified from Borgatti & Everett (1997) to allow for a disconnected network
   degree_vals <- igraph::degree(es_network, loops = FALSE, normalized = FALSE)

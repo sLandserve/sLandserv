@@ -3,15 +3,15 @@
 #'@description `create_ee_network` takes as input a spatial data layer (either real data or result of
 #'  `ls_create`) and derives the underlying supply (ecological-ecological) network
 #'
-#'@param ls_supply polygon containing ecosystem service supply areas
+#'@param ls_supply Polygons containing ecosystem service supply areas
 #'
-#'@param ee_thresh distance threshold for the ecological-ecological links
+#'@param ee_thresh Distance threshold for the ecological-ecological links
 #'
-#'@param supply_area name of the column containing the supply area measure
+#'@param supply_area Name of the column containing the supply area measure
 #'
-#'@param e2e logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)
+#'@param e2e Logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)
 #'
-#'@param params vector containing the parameters used to generate the landscape if landscape is simulated (default = NULL)
+#'@param params Vector containing the parameters used to generate the landscape if landscape is simulated (default = NULL)
 #'
 #'@return A list containing the network (and its attributes) and the parameters used to create the network
 #'
@@ -61,10 +61,10 @@ create_ee_network <- function(ls_supply,
   # edge density
   params$ee_density <- igraph::edge_density(ee_network, loops = TRUE)
 
-  # closeness centralisation - note this is only valid for a fully connected network
+  # closeness centralisation - note this is only valid for a fully connected network, so use with caution
   params$ee_centr_close <- igraph::centr_clo(ee_network, normalized = TRUE)$centralization
 
-  # betweenness centralisation - note this is only valid for a fully connected network
+  # betweenness centralisation - note this is only valid for a fully connected network, so use with caution
   params$ee_centr_betw <- igraph::centr_betw(ee_network, directed = FALSE, normalized = TRUE)$centralization
 
   # degree centralisation

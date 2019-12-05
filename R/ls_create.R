@@ -15,13 +15,13 @@
 #'@param f_supply Fragmentation level of the ES supply (in the range [0, 1] with 1 being
 #'  the most fragmented)
 #'
-#'@param f_demand Fragmentation level of the ES supply (in the range [0, 1] with 1 being
+#'@param f_demand Fragmentation level of the ES demand (in the range [0, 1] with 1 being
 #'  the most fragmented)
 #'
-#'@param grad Steepness of spatial gradient for supply (in the range [0, 1] with 1 being
+#'@param grad Steepness of spatial gradient for supply and demand (in the range [0, 1] with 1 being
 #'  the steepest gradient)
 #'
-#'@param inter Interpersion between ES supply and demand across the spatial gradient (in
+#'@param inter Interpersion between ES supply and demand along the spatial gradient (in
 #'  the range [0, 1] with 1 being most interspersed)
 #'
 #'@return A list containing a polygon containing the supply patches, a
