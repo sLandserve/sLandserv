@@ -52,29 +52,40 @@ create_ee_network <- function(ls_supply,
   ee_thresh <- ifelse(is.na(ee_thresh), -1, ee_thresh)
   net_links <- ifelse(net_links <= ee_thresh, 1, 0)
 
-  #number of supply nodes
+  # number of supply nodes
   params$num_supply <- nrow(ls_supply)
+
+  # mean of area of supply nodes
+  params$mean_supply_area <- mean(ls_supply$area)
+
+  # standard deviation of area of supply nodes
+  params$sd_supply_area <- sd(ls_supply$area)
 
   # calculate some network metrics
   ee_network <-  igraph::graph_from_adjacency_matrix(net_links, diag = TRUE, mode = "undirected")
-
-  # edge density
-  params$ee_density <- igraph::edge_density(ee_network, loops = TRUE)
-
-  # closeness centralisation - note this is only valid for a fully connected network, so use with caution
-  params$ee_centr_close <- igraph::centr_clo(ee_network, normalized = TRUE)$centralization
-
-  # betweenness centralisation - note this is only valid for a fully connected network, so use with caution
-  params$ee_centr_betw <- igraph::centr_betw(ee_network, directed = FALSE, normalized = TRUE)$centralization
-
-  # degree centralisation
-  params$ee_centr_degree <- igraph::centr_degree(ee_network, loops = TRUE, normalized = TRUE)$centralization
 
   # mean edges per node
   params$ee_edge_per_node_mean <- mean(igraph::degree(ee_network, loops = TRUE, normalized = TRUE))
 
   # sd edges per node
   params$ee_edge_per_node_sd <- sd(igraph::degree(ee_network, loops = TRUE, normalized = TRUE))
+
+  # edge density
+  params$ee_density <- igraph::edge_density(ee_network, loops = TRUE)
+
+  # for centrality measures we only calculate for nodes that are connected to at least one other node because we are
+  # interested in the structure of the network for connected habitat patches to detect whether there is a single or a
+  # only a few habitat patches responsible for connectivity (i.e., highly centralised), or not (i.e., not centralised)
+  ee_network_con <- delete.vertices(ee_network, which(degree(ee_network) == 2))
+
+  # closeness centralisation - note this is only valid for a fully connected network, so use with caution
+  params$ee_centr_close <- igraph::centr_clo(ee_network_con, normalized = TRUE)$centralization
+
+  # betweenness centralisation - note this is only valid for a fully connected network, so use with caution
+  params$ee_centr_betw <- igraph::centr_betw(ee_network_con, directed = FALSE, normalized = TRUE)$centralization
+
+  # degree centralisation
+  params$ee_centr_degree <- igraph::centr_degree(ee_network_con, loops = TRUE, normalized = TRUE)$centralization
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%

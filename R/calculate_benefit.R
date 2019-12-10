@@ -1,19 +1,19 @@
 #'Calculate ecosystem service benefit from a network
 #'
-#'@description `calculate_benefit` calculates the ecosystem services benefits from a given
+#'@description `calculate_benefit` Calculates the ecosystem services benefits from a given
 #'  network and a given set of rules.
 #'
-#'@param ee_network ecological-ecological network from which to calculate supply (created using `create_ee_network`)
+#'@param ee_network Ecological-ecological network from which to calculate supply (created using `create_ee_network`)
 #'
-#'@param es_network social-ecological network from which to calculate benefit (created using `create_es_network`)
+#'@param es_network Social-ecological network from which to calculate benefit (created using `create_es_network`)
 #'
-#'@param rival whether the services are rival (TRUE) or non-rival (FALSE)
+#'@param rival Whether the services are rival (TRUE) or non-rival (FALSE)
 #'
-#'@param alpha the rate of production of the potential ecosystem service per unit area at supply nodes (value > 0)
+#'@param alpha The rate of production of the potential ecosystem service per unit area at supply nodes (value > 0)
 #'
-#'@param beta the influence of connected supply nodes (i.e., the ecological-ecological links) on the rate of production of the potential ecosystem service at supply nodes (value > 0)
+#'@param beta The influence of connected supply nodes (i.e., the ecological-ecological links) on the rate of production of the potential ecosystem service at supply nodes (value > 0)
 #'
-#'@param gamma marginal utility of the service at zero service used
+#'@param gamma Marginal utility of the service at zero service used
 #'
 #'@return A vector containing the ecosystem service benefit and the parameters used to generate the network
 #'
