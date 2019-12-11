@@ -106,17 +106,16 @@ create_es_network <- function(ls_supply,
   params$es_density <- igraph::gsize(es_network) / (n_supply * n_demand)
 
   # mean edges per node
-  params$es_edge_per_node_mean <- mean(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
+  params$es_edge_per_node_mean <- mean(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!igraph::vertex_attr(es_network)$type] /
                                                      n_demand,
-                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
+                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[igraph::vertex_attr(es_network)$type] /
                                                      n_supply))
 
   # sd edges per node
-  params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!es_network$type] /
+  params$es_edge_per_node_sd <- sd(c(igraph::degree(es_network, loops = FALSE, normalized = FALSE)[!igraph::vertex_attr(es_network)$type] /
                                                      n_demand,
-                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[es_network$type] /
+                                         igraph::degree(es_network, loops = FALSE, normalized = FALSE)[igraph::vertex_attr(es_network)$type] /
                                                      n_supply))
-
 
   # for centrality measures we only calculate for nodes that are connected to at least one other node because we are
   # interested in centrality for the nodes that link supply and demand (e.g., to identify cases when one or a few supply

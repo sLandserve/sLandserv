@@ -76,7 +76,7 @@ create_ee_network <- function(ls_supply,
   # for centrality measures we only calculate for nodes that are connected to at least one other node because we are
   # interested in the structure of the network for connected habitat patches to detect whether there is a single or a
   # only a few habitat patches responsible for connectivity (i.e., highly centralised), or not (i.e., not centralised)
-  ee_network_con <- delete.vertices(ee_network, which(degree(ee_network) == 2))
+  ee_network_con <- igraph::delete.vertices(ee_network, which(degree(ee_network) == 2))
 
   # closeness centralisation - note this is only valid for a fully connected network, so use with caution
   params$ee_centr_close <- igraph::centr_clo(ee_network_con, normalized = TRUE)$centralization
