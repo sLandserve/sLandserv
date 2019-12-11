@@ -120,7 +120,7 @@ create_es_network <- function(ls_supply,
   # for centrality measures we only calculate for nodes that are connected to at least one other node because we are
   # interested in centrality for the nodes that link supply and demand (e.g., to identify cases when one or a few supply
   # nodes are connected to many demand nodes, or when one or a few demand nodes are connected to many supply nodes)
-  es_network_con <- igraph::delete.vertices(es_network, which(degree(es_network) == 0))
+  es_network_con <- igraph::delete_vertices(es_network, which(degree(es_network) == 0))
   n_supply_con <- sum(!igraph::vertex_attr(es_network_con)$type)
   n_demand_con <- sum(igraph::vertex_attr(es_network_con)$type)
 
