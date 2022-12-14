@@ -88,10 +88,10 @@ create_ee_network <- function(ls_supply,
   params$ee_centr_degree <- igraph::centr_degree(ee_network_con, loops = TRUE, normalized = TRUE)$centralization
 
   # get network in correct format
-  network <- net_links %>% tibble::as_tibble() %>%
+  network <- net_links %>% tibble::as_tibble(.name_repair = "unique") %>%
     tibble::rownames_to_column("node_1") %>%
     tidyr::gather(node_2, link, -node_1) %>%
-    dplyr::mutate(node_2 = stringr::str_replace(node_2, "V", ""),
+    dplyr::mutate(node_2 = stringr::str_replace(node_2, "...", ""),
                   node_1 = as.integer(node_1),
                   node_2 = as.integer(node_2)) %>%
     dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node_1" = "ID")) %>%
