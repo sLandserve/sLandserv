@@ -44,7 +44,7 @@ create_ee_network <- function(ls_supply,
 
   # calculate all pairwise distances
   if(!e2e) {
-    sf::st_agr(ls_supply) = "constant" # this removes the warning message
+    sf::st_agr(ls_supply) <- "constant" # this removes the warning message
     ls_supply <- sf::st_centroid(ls_supply)
   }
 
