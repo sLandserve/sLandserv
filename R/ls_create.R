@@ -44,9 +44,9 @@ ls_create <- function(nrow,
 
   max_dim <- max(nrow, ncol)
   N <- as.integer(ceiling(base::log(max_dim - 1, 2)))
-  size <- 2 ** N + 1
-  nrow = size
-  ncol = size
+  size <- 2 ^ N + 1
+  nrow <- size
+  ncol <- size
 
   params <- data.frame(nrow = nrow, ncol = ncol, p_supply = p_supply, p_demand = p_demand, f_supply = f_supply, f_demand = f_demand, inter = inter,
                 grad = grad)
@@ -59,14 +59,18 @@ ls_create <- function(nrow,
 
   # create supply and demand surfaces
   # here we control the level of fragmentation
-  supply <- NLMR::nlm_mpd(ncol,
-                    nrow,
-                    roughness = f_supply,
-                    verbose = FALSE)
-  demand <- NLMR::nlm_mpd(ncol,
-                    nrow,
-                    roughness = f_demand,
-                    verbose = FALSE)
+  suppressWarnings(supply <- NLMR::nlm_mpd(ncol + 2, nrow + 2,
+                    roughness = f_supply)) # add 2 to ncol and nrow since nlm_mdp removes outer edge
+  suppressWarnings(demand <- NLMR::nlm_mpd(ncol + 2, nrow + 2,
+                    roughness = f_demand)) # add 2 to ncol and nrow since nlm_mdp removes outer edge
+
+  # check supply and demand rasters are the same size as g_supply and g_demand rasters
+  if (raster::extent(supply) != raster::extent(g_supply)) {
+    warning("supply gradient and factal landscapes not the same extent")
+  }
+  if (raster::extent(demand) != raster::extent(g_demand)) {
+    warning("demand gradient and factal landscapes not the same extent")
+  }
 
   # create the analysis landscape: this takes 3 steps:
   # 1. merge with gradients and control gradient steepness
