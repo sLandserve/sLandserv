@@ -1,7 +1,7 @@
 #'Create social-ecological networks
 #'
 #'@description `create_es_network` takes as input a spatial data layer (either real data or result of
-#'  `ls_create`) and derives the underlying supply (ecological-ecological) network
+#' `ls_create`) and derives the underlying supply (ecological-ecological) network
 #'
 #'@param ls_supply Polygons containing ecosystem service supply areas
 #'
@@ -9,13 +9,19 @@
 #'
 #'@param es_thresh Distance threshold for the social-ecological links
 #'
+#'@param excludable Whether the ecosystem service is excludable or not. If `TRUE` then only one demand node
+#' (chosen at random) is connected to each supply node. If `FALSE' then any number of demand nodes
+#' can be connected to each supply node
+#'
 #'@param supply_area Name of the column containing the supply area measure
 #'
 #'@param demand_area Name of the column containing the demand area measure
 #'
-#'@param e2e Logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)
+#'@param e2e Logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE`
+#' centroid-to-centroid distances are calculated (the latter is much quicker)
 #'
-#'@param params Vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)
+#'@param params Vector containing the parameters used to generate the landscape
+#' (if simulated landscapes used, default = NULL)
 #'
 #'@return A list containing the network (and its attributes) and the parameters used to create the network
 #'
@@ -28,6 +34,7 @@
 create_es_network <- function(ls_supply,
                               ls_demand,
                               es_thresh,
+                              excludable,
                               supply_area,
                               demand_area,
                               e2e = TRUE,
@@ -35,9 +42,10 @@ create_es_network <- function(ls_supply,
 
   # if no parameters are input, start the table here
   if(is.null(params)) {
-    params <- data.frame(es_thresh = es_thresh)
+    params <- data.frame(es_thresh = es_thresh, excludable = excludable)
   } else {
     params$es_thresh <- es_thresh
+    params$excludable <- excludable
   }
 
   # turn into sf object
@@ -46,32 +54,40 @@ create_es_network <- function(ls_supply,
 
   # add on an ID column
   ls_supply <- dplyr::mutate(ls_supply, ID = 1:dplyr::n()) %>%
-    dplyr::rename(area = !!supply_area)
+    dplyr::rename(area_node = !!supply_area)
   ls_demand <- dplyr::mutate(ls_demand, ID = 1:dplyr::n()) %>%
-    dplyr::rename(area = !!demand_area)
+    dplyr::rename(area_node = !!demand_area)
 
   # calculate all pairwise distances
 
   # if e2e is false, convert to centroid points before calculating distances
   if(!e2e) {
-    sf::st_agr(ls_supply) = "constant" # this removes the warning message
-    sf::st_agr(ls_demand) = "constant" # this removes the warning message
+    sf::st_agr(ls_supply) <- "constant" # this removes the warning message
+    sf::st_agr(ls_demand) <- "constant" # this removes the warning message
     ls_supply <- sf::st_centroid(ls_supply)
     ls_demand <- sf::st_centroid(ls_demand)
-
   }
 
+  # get distance between supply and demand nodes
   net_links <- sf::st_distance(ls_supply, ls_demand)
-  net_links <- ifelse(net_links <= es_thresh, 1, 0)
+  if (excludable == FALSE) {
+      # not excludable - retain all supply-demand links
+      net_links <- ifelse(net_links <= es_thresh, 1, 0)
+  }
+  else {
+      # excludable - retain only one supply-demand link (chosen at random) per supply node
+      net_links <- ifelse(net_links <= es_thresh, 1, 0) %>%
+        apply(1, FUN = function(X){X[-sample(which(X == 1), 1)] <- 0; return(X)}) %>% t()
+  }
 
   # number of demand nodes
   params$num_demand <- nrow(ls_demand)
 
   # mean of area of demand nodes
-  params$mean_demand_area <- mean(ls_demand$area)
+  params$mean_demand_area <- mean(ls_demand$area_node)
 
   # standard deviation of demand nodes
-  params$sd_demand_area <- sd(ls_demand$area)
+  params$sd_demand_area <- sd(ls_demand$area_node)
 
   # escape from function and return NA if no social-ecological links
   if(sum(net_links) == 0) {
@@ -197,10 +213,10 @@ create_es_network <- function(ls_supply,
   params$es_centr_degree_demand <- igraph::centralize(degree_vals_demand, theoretical.max = degree_tmax_demand, normalized = TRUE)
 
   # get network in correct format
-  network <- net_links %>% tibble::as_tibble() %>%
+  network <- net_links %>% tibble::as_tibble(.name_repair = "unique") %>%
     tibble::rownames_to_column("node_supply") %>%
     tidyr::gather(node_demand, link, -node_supply) %>%
-    dplyr::mutate(node_demand = stringr::str_replace(node_demand, "V", ""),
+    dplyr::mutate(node_demand = stringr::str_replace(node_demand, "...", ""),
                   node_supply = as.integer(node_supply),
                   node_demand = as.integer(node_demand)) %>%
     dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL),
