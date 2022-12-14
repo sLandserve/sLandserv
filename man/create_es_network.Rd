@@ -4,44 +4,30 @@
 \alias{create_es_network}
 \title{Create social-ecological networks}
 \usage{
-create_es_network(
-  ls_supply,
-  ls_demand,
-  es_thresh,
-  excludable,
-  supply_area,
-  demand_area,
-  e2e = TRUE,
-  params = NULL
-)
+create_es_network(ls_supply, ls_demand, es_thresh, supply_area,
+  demand_area, e2e = TRUE, params = NULL)
 }
 \arguments{
-\item{ls_supply}{Polygons containing ecosystem service supply areas}
+\item{ls_supply}{polygon containing ecosystem service supply areas}
 
-\item{ls_demand}{Polygons containing ecosystem service demand areas}
+\item{ls_demand}{polygon containing ecosystem service demand areas}
 
-\item{es_thresh}{Distance threshold for the social-ecological links}
+\item{es_thresh}{distance threshold for the social-ecological links}
 
-\item{excludable}{Whether the ecosystem service is excludable or not. If `TRUE` then only one demand node
-(chosen at random) is connected to each supply node. If `FALSE' then any number of demand nodes
-can be connected to each supply node}
+\item{supply_area}{name of the column containing the supply area measure}
 
-\item{supply_area}{Name of the column containing the supply area measure}
+\item{demand_area}{name of the column containing the demand area measure
 
-\item{demand_area}{Name of the column containing the demand area measure}
+#'@param e2e logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE` centroid-to-centroid distances are calculated (the latter is much quicker)}
 
-\item{e2e}{Logical. If `TRUE` edge-to-edge distances between patches are calculated. If `FALSE`
-centroid-to-centroid distances are calculated (the latter is much quicker)}
-
-\item{params}{Vector containing the parameters used to generate the landscape
-(if simulated landscapes used, default = NULL)}
+\item{params}{vector containing the parameters used to generate the landscape (if landscape is simulated, default = NULL)}
 }
 \value{
 A list containing the network (and its attributes) and the parameters used to create the network
 }
 \description{
 `create_es_network` takes as input a spatial data layer (either real data or result of
-`ls_create`) and derives the underlying supply (ecological-ecological) network
+ `ls_create`) and derives the underlying supply (ecological-ecological) network
 }
 \keyword{ecological}
 \keyword{ecosystem}

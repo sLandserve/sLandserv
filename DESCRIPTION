@@ -1,6 +1,6 @@
 Package: sLandserv
 Title: sLandserv Workshop Functions
-Version: 0.0.0.9001
+Version: 0.0.0.9000
 Authors@R: c(person("Laura", "Graham", email = "laurajaneegraham@gmail.com", role = c("aut", "cre")),
              person("Jonathan", "Rhodes", email = "j.rhodes@uq.edu.au", role = c("aut")))
 Description: This package brings together all the functions created for the sLandserv workshop. 
@@ -8,5 +8,5 @@ Depends: R (>= 3.5.0)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 6.1.0
 Imports: NLMR, landscapetools, sf, raster, tidyverse, rgeos, igraph

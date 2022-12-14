@@ -4,7 +4,7 @@
 \alias{ls_create}
 \title{Create landscapes of ecosystem service supply (ecological) and demand (social) patches}
 \usage{
-ls_create(nrow, ncol, p_supply, p_demand, f_supply, f_demand, grad, inter)
+ls_create(nrow, ncol, p_supply, p_demand, f_supply, f_demand, inter)
 }
 \arguments{
 \item{nrow}{Number of rows in the raster}
@@ -18,14 +18,11 @@ ls_create(nrow, ncol, p_supply, p_demand, f_supply, f_demand, grad, inter)
 \item{f_supply}{Fragmentation level of the ES supply (in the range [0, 1] with 1 being
 the most fragmented)}
 
-\item{f_demand}{Fragmentation level of the ES demand (in the range [0, 1] with 1 being
+\item{f_demand}{Fragmentation level of the ES supply (in the range [0, 1] with 1 being
 the most fragmented)}
 
-\item{grad}{Steepness of spatial gradient for supply and demand (in the range [0, 1] with 1 being
-the steepest gradient)}
-
-\item{inter}{Interpersion between ES supply and demand along the spatial gradient (in
-the range [0, 1] with 1 being most interspersed)}
+\item{inter}{Interpersion between ES supply and demand (in the range [0, 1] with 1 being
+completely interspersed)}
 }
 \value{
 A list containing a polygon containing the supply patches, a
@@ -34,7 +31,7 @@ A list containing a polygon containing the supply patches, a
 \description{
 `ls_create` simulates ecosystem service supply and demand landscapes based
  on a number of parameters: proportion of supply/demand; fragmentation of
- supply/demand; steepness of supply gradient; interspersion of supply/demand
+ supply/demand; interspersion of supply/demand
 }
 \keyword{ecological}
 \keyword{ecosystem}

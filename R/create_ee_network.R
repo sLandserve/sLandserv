@@ -89,14 +89,14 @@ create_ee_network <- function(ls_supply,
 
   # get network in correct format
   network <- net_links %>% tibble::as_tibble() %>%
-    tibble::rownames_to_column("node_1") %>%
-    tidyr::gather(node_2, link, -node_1) %>%
-    dplyr::mutate(node_2 = stringr::str_replace(node_2, "V", ""),
-                  node_1 = as.integer(node_1),
-                  node_2 = as.integer(node_2)) %>%
-    dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node_1" = "ID")) %>%
-    dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node_2" = "ID"),
-                      suffix = c("_node_1", "_node_2"))
+    tibble::rownames_to_column("node1") %>%
+    tidyr::gather(node2, link, -node1) %>%
+    dplyr::mutate(node2 = stringr::str_replace(node2, "V", ""),
+                  node1 = as.integer(node1),
+                  node2 = as.integer(node2)) %>%
+    dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node1" = "ID")) %>%
+    dplyr::inner_join(ls_supply %>% sf::st_set_geometry(NULL), by = c("node2" = "ID"),
+                      suffix = c("_node1", "_node2"))
 
   return(list(network = network, params = params))
 }
