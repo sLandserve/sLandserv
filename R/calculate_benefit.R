@@ -48,7 +48,7 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
   supply <- dplyr::left_join(supply, connected_supply, by = "node_1") %>%
     dplyr::mutate(connected_supply = dplyr::case_when(is.na(connected_supply) ~ 0,
                                                TRUE ~ connected_supply)) %>%
-    dplyr::mutate(supply = lambda * exp(beta * connected_supply) * area_node_1 ^ alpha)
+    dplyr::mutate(supply = lambda * area_node_1 ^ alpha * exp(beta * (connected_supply / area_node_1)))
 
   # if there is no social-ecological network, escape function and return 0
   # for benefit
