@@ -72,7 +72,7 @@ calculate_benefit <- function(ee_network, es_network, rival, alpha, beta, gamma,
 
     benefit <- demand %>%
       dplyr::inner_join(competing, by = "node_supply") %>%
-      dplyr::mutate(prop_benefit = area_node_demand / connected_demand_area) %>%
+      dplyr::mutate(prop_benefit = 1 / (phi * connected_demand_area)) %>%
       dplyr::group_by(node_demand, node_supply) %>%
       dplyr::summarise(area_node_demand = first(area_node_demand), supply = first(supply),
                        prop_benefit = sum(prop_benefit), .groups = "drop") %>%
