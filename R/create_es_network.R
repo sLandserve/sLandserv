@@ -77,7 +77,8 @@ create_es_network <- function(ls_supply,
   else {
       # excludable - retain only one supply-demand link (chosen at random) per supply node
       net_links <- ifelse(net_links <= es_thresh, 1, 0) %>%
-        apply(1, FUN = function(X){X[-sample(which(X == 1), 1)] <- 0; return(X)}) %>% t()
+                   apply(1, FUN = function(X){if (length(which(X == 1)) > 0) {X[-sample(which(X == 1), 1)] <- 0}; return(X)}) %>%
+                    t()
   }
 
   # number of demand nodes
