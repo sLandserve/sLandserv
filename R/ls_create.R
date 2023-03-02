@@ -89,14 +89,14 @@ ls_create <- function(nrow,
                       level_names = c("neutral", "demand"))
 
   # 3. polygonise and split out supply and demand
-  ls_supply <- raster::rasterToPolygons(ls_supply, dissolve=TRUE) %>%
+  ls_supply <- raster::rasterToPolygons(ls_supply, dissolve=TRUE) %>% sf::st_as_sf() %>% as("Spatial") %>%
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
     dplyr::mutate(patch_area = sf::st_area(.)) %>%
     dplyr::filter(layer == 2) %>%
     dplyr::select(-layer)
 
-  ls_demand <- raster::rasterToPolygons(ls_demand, dissolve=TRUE) %>%
+  ls_demand <- raster::rasterToPolygons(ls_demand, dissolve=TRUE) %>% sf::st_as_sf() %>% as("Spatial") %>%
     raster::disaggregate() %>%
     sf::st_as_sf() %>%
     dplyr::mutate(patch_area = sf::st_area(.)) %>%
